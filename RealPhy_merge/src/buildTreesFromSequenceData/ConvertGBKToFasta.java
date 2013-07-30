@@ -19,10 +19,9 @@ public class ConvertGBKToFasta {
 			if(!DNA){
 				flank=0;
 			}
-			
 			BufferedWriter bw=new BufferedWriter(new FileWriter(out));
-			ReadGenbank rgb=new ReadGenbank(gbk);
-			HashMap<String,String> genome=Fasta.fasToHash(rgb.getSequence(),true);
+			ReadGenbank rgb=new ReadGenbank(gbk,"CDS");
+			HashMap<String,String> genome=Fasta.fasToHash(rgb.getSequence(),false);
 			
 			ArrayList<String> ids=rgb.getIds();
 			int count=0;

@@ -95,7 +95,7 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 				}
 				if(regionsRef.charAt(i)=='m'){
 					//TODO flanking not taken care of!!!
-					setCoverageSingle(pos, readPos, fastaId, sequence,qualityString, quality, orientation, subInfo, readID,weight,gap);
+					setCoverageSingle(pos, readPos, fastaId, sequence,qualityString, quality, orientation, subInfo, readID,weight,gap,flank);
 					if(gap){
 						setGap(sequence, readPos, pos-posorig, readID, orientation, posorig, flank, fastaId, subInfo, weight);
 					}
@@ -112,7 +112,7 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 				}
 				if(regionsRef.charAt(i)=='m'){
 					//TODO flanking not taken care of!!!
-					setCoverageSingle(pos, readPos, fastaId, sequence,qualityString, quality, orientation, subInfo, readID,weight,gap);
+					setCoverageSingle(pos, readPos, fastaId, sequence,qualityString, quality, orientation, subInfo, readID,weight,gap,flank);
 					if(gap){
 						setGap(sequence, readPos, pos-posorig, readID, orientation, posorig, flank, fastaId, subInfo, weight);
 					}
@@ -130,10 +130,7 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 		for(int j=0;j<posMismatchesRead.size();j++){
 			int mismatchRead=posMismatchesRead.get(j)-1;
 			int mismatchRef=posMismatchesRef.get(j)-1;
-			//System.out.println(readID+" "+posorig+mismatchRef+" "+posMismatchesRead.size());
-
-
-			//System.out.println(readSubPos);
+			
 			setSubstitution(sequence, mismatchRead,mismatchRef, readID, qualityString, orientation, posorig, flank, quality, fastaId,  subInfo,weight);
 
 		}
@@ -144,10 +141,6 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 			int gapRead=posGapsRead.get(j);
 			int gapRef=posGapsRef.get(j);
 
-			//System.out.println(readID+" "+posorig+mismatchRef+" "+posMismatchesRead.size());
-
-
-			//System.out.println(readSubPos);
 			setGap(sequence,gapRead,gapRef, readID, orientation, posorig, flank, fastaId,  subInfo,weight);
 
 		}

@@ -61,6 +61,13 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 		return soapFiles;
 	}
 	
+	private void print(TreeMap<Integer,Character> tm){
+		Iterator <Entry<Integer,Character>> it=tm.entrySet().iterator();
+		while(it.hasNext()){
+			Entry<Integer,Character> e=it.next();
+			System.out.println(e.getKey()+" "+e.getValue());
+		}
+	}
 	
 	  ArrayList<Integer> deleteUnsureRegions(PointSubstitutions pss,int geneNumber) {
 		String id=genePoly.get(geneNumber).geneID;
@@ -68,13 +75,13 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 		ArrayList<Integer> delete=new ArrayList<Integer>();
 		double[] coverage=pss.getCoverage(id);
 		Arrays geneBases=pss.getBases(id);
-		//System.out.println(id);
 		int k=0;
 		while(it.hasNext()){
 			Entry<Integer,Character> e=it.next();
 			int frame=genes?k%3:0;
 			int pos=e.getKey();
 			char base=e.getValue();
+			
 			double numMajorPoly=geneBases.numMajorPolymorphism(pos);
 			double ratioPoly=numMajorPoly/(coverage[pos]*1.0);
 			if((pos<coverage.length&&coverage[pos]<perBaseCoverage)||(pos>=coverage.length)||!ATGC.containsKey(base)||(ratioPoly < polymorphismThreshold && ratioPoly > (1- polymorphismThreshold ))){//delete whole triplets
@@ -101,7 +108,7 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 			char orient=split[2].charAt(0);
 			String contig=split[3];
             sum+=fas.get(i).getSequence().length();
-
+            
 			genePoly.add(new Genes(id,addReference?referenceTreeMap(fas.get(i).getSequence()):new TreeMap<Integer,Character>(),fas.get(i).getSequence().length()-2*flank,Integer.parseInt(pos),orient,contig));
 		}
 		
@@ -110,8 +117,8 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
     
     private TreeMap<Integer,Character> referenceTreeMap(String seq){
     	TreeMap<Integer,Character> tm=new TreeMap<Integer, Character>();
-    	for(int i=0;i<seq.length();i++){
-    		tm.put(i+1, seq.charAt(i));//changed
+    	for(int i=0+flank;i<seq.length()-flank;i++){
+    		tm.put(i+1-flank, seq.charAt(i));//changed
     	}
     	return tm;
     }

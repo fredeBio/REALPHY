@@ -39,6 +39,7 @@ public class IntervalTree <T extends Interval<T>> {
      * @throws DuplicateItemException if x is already present.
      */
     public void insert( T x ) {
+    	
         root = insert( x, root,null );
 //       	if(counter==15){
 //       		parseTree(root);

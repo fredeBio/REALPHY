@@ -233,6 +233,7 @@ import util.*;
 		    						//and the site is not already stored 
 		    						if(!genePoly.get(i).polymorphisms.containsKey(j)){
 		    							int frame=genes?(j-1)%3:0;
+		    
 
 		    							//add it to the overall polymorphism collection
 		    							genePoly.get(i).polymorphisms.put(j-frame,gene.charAt(j-1+flank-frame));

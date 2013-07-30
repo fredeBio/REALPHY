@@ -155,7 +155,7 @@ public class ReadGenbank {
 					if(info.length()>0 && start>-1){
 						info=complement?info+" complement":info;
 						char orient=complement?'-':'+';
-						if(oFeature==null||oFeature.containsKey(feature))infoTree.insert((new Info(start,end,info,orient)).setPseudo(pseudo).setFeature(feature));
+						if(oFeature==null||oFeature.containsKey(feature))infoTree.insert((new Info(start,end,info)).setOrient(orient).setPseudo(pseudo).setFeature(feature));
 						info=new String("");
 						pseudo = false;
 					}
@@ -164,7 +164,7 @@ public class ReadGenbank {
 						if(info.length()>0){
 							info=complement?info+" complement":info;
 							char orient=complement?'-':'+';
-							if(oFeature==null||oFeature.containsKey(feature))infoTree.insert((new Info(start,end,info,orient)).setPseudo(pseudo).setFeature(feature));
+							if(oFeature==null||oFeature.containsKey(feature))infoTree.insert((new Info(start,end,info)).setOrient(orient).setPseudo(pseudo).setFeature(feature));
 							infoHash.put(locus, infoTree);
 							ids.add(locus);
 							pseudo=false;

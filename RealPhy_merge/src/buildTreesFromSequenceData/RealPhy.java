@@ -13,10 +13,6 @@ import util.*;
 
 
 public class RealPhy {
-	/**
-	 * Now with version control! Tester2
-	 */
-	private static final long serialVersionUID = 101L;
 	public static  final String fasExt[]=new String[]{"fas","fa","fasta","fna"};
 	public static final String gbkExt[]=new String[]{"gbk","gb"};
 	File sequenceFolder=null;

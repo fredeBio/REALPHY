@@ -454,7 +454,7 @@ public abstract class PointSubstitutions {
 	
 	
 	
-	 String getQueryName(String readID,int subpos,char orientation,int length,int pos){
+	 String getQueryName(String readID,int subpos,char orientation,int length){
 		 String readIDsplit[]=readID.split("_");
 		 String subID="";
 		 if(readIDsplit.length>0){
@@ -528,7 +528,7 @@ public abstract class PointSubstitutions {
 					}else{
 						int length=readSequence.length();
 						if(!bases.get(geneId).isset(sub)){
-							String subID=getQueryName(readID, mismatchRead, orientation,length,sub);
+							String subID=getQueryName(readID, mismatchRead, orientation,length);
 							bases.get(geneId).set(sub, base,subID,weight);
 						}else{
 							bases.get(geneId).set(sub, base,weight);
@@ -570,7 +570,7 @@ public abstract class PointSubstitutions {
 				 }else{
 					 int length=readSequence.length();
 					 if(!bases.get(fastaId).isset(sub)){
-						 String subID=getQueryName(readID, mismatchRead, orientation,length,sub);
+						 String subID=getQueryName(readID, mismatchRead, orientation,length);
 						 bases.get(fastaId).set(sub, base,subID,weight);
 					 }else{
 						 bases.get(fastaId).set(sub, base,weight);
@@ -593,7 +593,7 @@ public abstract class PointSubstitutions {
 		//System.out.println(readID+" "+pos+" "+length);
 		 for (int i = pos; i < pos + length && i<lengthSeq; i++) {
 			 int subpos=i-pos;
-			 if (lengthSeq > i &&qualityString.charAt(subpos)-33>=quality){
+			 if (i>0&&lengthSeq > i &&qualityString.charAt(subpos)-33>=quality){
 				 cov[i]+=weight;
 
 				 if(orientation=='+'){
@@ -604,7 +604,7 @@ public abstract class PointSubstitutions {
 			 }
 			 if(subInfo){
 				 if(baseNames.get(fastaId)[i]==null){
-					 String subID=getQueryName(readID, subpos, orientation,length,i);
+					 String subID=getQueryName(readID, subpos, orientation,length);
 					 baseNames.get(fastaId)[i]=subID;
 				 }
 
@@ -627,25 +627,26 @@ public abstract class PointSubstitutions {
 	  * @param weight
 	  * @param gap
 	  */
-	 void setCoverageSingle(int pos,int readPos,String fastaId,String sequence,String qualityString,int quality,char orientation,boolean subInfo,String readID, double weight,boolean gap){
+	 void setCoverageSingle(int pos,int readPos,String fastaId,String sequence,String qualityString,int quality,char orientation,boolean subInfo,String readID, double weight,boolean gap,int flank){
 		int lengthSeq=	coverage.get(fastaId).length;
 		double[] cov=coverage.get(fastaId);
 		double[] covPos=coveragePos.get(fastaId);
 		double[] covNeg=coverageNeg.get(fastaId);
 		int subpos=readPos;
-		if (lengthSeq > pos &&qualityString.charAt(subpos)-33>=quality){
-			cov[pos]+=weight;
+		int sub=pos-flank;
+		if (sub>=0&&lengthSeq > sub &&qualityString.charAt(subpos)-33>=quality){
+			cov[sub]+=weight;
 
 			if(orientation=='+'){
-				covPos[pos]+=weight;
+				covPos[sub]+=weight;
 			}else{
-				covNeg[pos]+=weight;
+				covNeg[sub]+=weight;
 			}
 		}
 		if(subInfo&&!gap){
-			if(baseNames.get(fastaId)[pos]==null){
-				String subID=getQueryName(readID, subpos, orientation,1,pos);
-				baseNames.get(fastaId)[pos]=subID;
+			if(baseNames.get(fastaId)[sub]==null){
+				String subID=getQueryName(readID, subpos, orientation,1);
+				baseNames.get(fastaId)[sub]=subID;
 			}
 
 		}
