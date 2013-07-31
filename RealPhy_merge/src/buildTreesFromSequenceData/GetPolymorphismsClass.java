@@ -24,7 +24,7 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 	ArrayList<Genes> genePoly=new ArrayList<Genes>();
 	HashMap<String /*strain*/,HashMap<String /*geneID*/,HashMap<Integer/*position*/,Polymorph/*poly*/>>> strains=new HashMap<String, HashMap<String,HashMap<Integer,Polymorph>>>();
 
-	HashMap<String,HashMap<String,String[]>> baseNames=new HashMap<String, HashMap<String,String[]>>();
+	HashMap<String,HashMap<String,ArrayList<Integer>[]>> baseNames=new HashMap<String, HashMap<String,ArrayList<Integer>[]>>();
 	File Reference=null;
 	int flank=0;
 	int quality=20;
@@ -60,14 +60,14 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 		}
 		return soapFiles;
 	}
-	
+	/*
 	private void print(TreeMap<Integer,Character> tm){
 		Iterator <Entry<Integer,Character>> it=tm.entrySet().iterator();
 		while(it.hasNext()){
 			Entry<Integer,Character> e=it.next();
 			System.out.println(e.getKey()+" "+e.getValue());
 		}
-	}
+	}*/
 	
 	  ArrayList<Integer> deleteUnsureRegions(PointSubstitutions pss,int geneNumber) {
 		String id=genePoly.get(geneNumber).geneID;
@@ -319,7 +319,7 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 				int pos=e2.getKey();
 				char origBase=e2.getValue();
 				StringBuffer baseColumn=new StringBuffer();
-				ArrayList<String> queryIDColumn=new ArrayList<String>();
+				ArrayList<Integer> queryIDColumn=new ArrayList<Integer>();
 				boolean addition=false;
 				for(int j=0;j<sorted.length;j++){
 					String strainEx=getStrain(sorted[j]);
@@ -332,23 +332,23 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 					
 					//id it is not one of the reference strains then skip this step
 					if(!baseNames.containsKey(sorted[j]))continue;
-					String[] GeneBaseNames=baseNames.get(sorted[j]).get(gene.geneID);
+					ArrayList<Integer>[] GeneBaseNames=baseNames.get(sorted[j]).get(gene.geneID);
 
-					String queryID;
+					int queryID;
 					if(polies.containsKey(pos)){
 						if(polies.get(pos).name==null){
 							System.err.println("something went wrong! polies get pos");
 							System.err.println("pos: "+pos+" strain: "+strainEx);
 							System.exit(-1);
 						}
-						queryID=strainEx+"_"+polies.get(pos).name;
+						queryID=polies.get(pos).name;
 						addition=true;
 					}else{
 						if(GeneBaseNames[pos]==null){
 							System.err.println("something went wrong!");
 							System.exit(-1);
 						}
-						queryID=strainEx+"_"+GeneBaseNames[pos];
+						queryID=getMajority(GeneBaseNames[pos]);
 					}
 					queryIDColumn.add(queryID);
 				}
@@ -360,7 +360,30 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 		return columns;
 
 	}
-
+	int getMajority(ArrayList<Integer> list){
+		HashMap<Integer,Integer> hm=new HashMap<Integer, Integer>();
+		int max=0;
+		int maxItem=-1;
+		for(int i=0;i<list.size();i++){
+			int item=list.get(i);
+			if(hm.containsKey(item)){
+				int count=hm.get(item)+1;
+				hm.put(item, count);
+				if(max<count){
+					max=count;
+					maxItem=item;
+				}
+			}else{
+				hm.put(item, 1);
+				if(max==0){
+					max=1;
+					maxItem=item;
+				}
+			}
+		}
+		return maxItem;
+		
+	}
 	
 	private ArrayList<String> toExtern(String[] internIDs){
 		ArrayList<String> strains=new ArrayList<String>();
@@ -386,3 +409,4 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 	}
 
 }
+ 

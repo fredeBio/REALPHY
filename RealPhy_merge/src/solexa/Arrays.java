@@ -1,6 +1,7 @@
 package solexa;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 
 public class Arrays implements Serializable{
@@ -11,12 +12,12 @@ public class Arrays implements Serializable{
 	private static final long serialVersionUID = 1L;
 	double[][] array;
 	double[] cov;
-	String[] queryID;	
+	ArrayList<Integer>[] queryID;	
 	public final int length;
 	public Arrays(int Length){
 		length=Length;
 		array=new double [length][10];
-		queryID=new String [length];
+		queryID=new ArrayList[length];
 	}
 	
 	public void setCoverage(double[] Coverage){
@@ -55,9 +56,15 @@ public class Arrays implements Serializable{
 		//System.err.println("Do not recognize "+ base+"!");
 		
 	}
-	public void set(int pos,String base,String query,double weight){
+	public void set(int pos,String base,int readPos,double weight){
 		set(pos,base,weight);
-		queryID[pos]=query;
+		if(queryID[pos]==null){
+			ArrayList<Integer> temp=new ArrayList<Integer>();
+			temp.add(readPos);
+			queryID[pos]=temp;
+		}else{
+			queryID[pos].add(readPos);
+		}
 	}
 	
 	public boolean isset(int pos){
@@ -103,7 +110,7 @@ public class Arrays implements Serializable{
 		return (numBases(pos)*1.0)/(cov[pos]*1.0);
 	}
 	
-	public String getQueryID(int pos){
+	public ArrayList<Integer> getQueryID(int pos){
 		return queryID[pos];
 	}
 	public int getMaxNuc(int pos){

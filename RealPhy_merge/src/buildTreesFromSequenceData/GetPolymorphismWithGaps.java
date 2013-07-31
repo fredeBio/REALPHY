@@ -126,9 +126,6 @@ import util.*;
 					bwDet.write("Strain\tContig\tGene\tRefGeneStartPos\tRefGenePos\tRefGenomePos\tOrig\tPoly\n");
 					bw.write(">"+strainIDExtern+"\n");
 					HashMap<String,HashMap<Integer,Polymorph>> strainPoly=e.getValue();
-//					int totalNumberSites=0;
-//					int numberGaps=0;
-					//ArrayList<Info> SNPs=new ArrayList<Info>();
 					int posInAlignment=1;
 					for(int i=0;i<genePoly.size();i++){
 						HashMap<Integer,Polymorph> polies=strainPoly.get(genePoly.get(i).geneID);
@@ -167,16 +164,9 @@ import util.*;
 								else bwDet.write("\n");
 								posInAlignment++;
 								bw.write(polies.get(pos).base);
-//								totalNumberSites++;
-								//SNPs.add(new Info(GenomePos,GenomePos,polies.get(pos).base+" "+strainID));
-//								if(polies.get(pos).base=='-'){
-//									numberGaps++;
-//								}
 							}else {
 								posInAlignment++;
 								bw.write(origBase);
-								//bwDet.write(gp.get(i).geneID+"\t"+pos+"\t"+origBase+"\t"+origBase+"\n");
-//								totalNumberSites++;
 							}
 						}
 						if(genes)bwGenePoly.write(strainIDExtern+"\t"+contig+"\t"+genePoly.get(i).geneID+"\t"+genePoly.get(i).pos+"\t"+syn+"\t"+nonsyn+"\t"+(syn/(1.0*nonsyn))+"\t"+genePoly.get(i).length+"\t"+((syn+nonsyn+1.0)/genePoly.get(i).length)+"\n");
@@ -184,10 +174,6 @@ import util.*;
 					bwDet.close();
 					bwGenePoly.close();
 					bw.write("\n");
-					//WriteArtemis.write(SNPs, new File(outFolder+"/"+strainID+".tab"));
-//					if((numberGaps*1.0)/totalNumberSites>0.5){
-//						System.err.println("More than 50% of all sites of "+strainIDExtern+" are Gaps!");
-//					}
 				}
 
 				bw.close();
@@ -249,7 +235,7 @@ import util.*;
 		    							if(!subInfo)strainPolymorphism.get(id).put(j, new Polymorph(base));
 
 		    							//if we intend to merge SNP files from multiple references then we also need to store information on where the SNP came from
-		    							else strainPolymorphism.get(id).put(j, new Polymorph(base,geneBases.getQueryID(j)));
+		    							else strainPolymorphism.get(id).put(j, new Polymorph(base,getMajority(geneBases.getQueryID(j))));
 		    						}
 		    					}else {
 		        					bw.write(id+"\t"+j+"\t"+base+"\t"+geneCoverage[j]+"\t"+numMajorPoly+"\t"+ratioPoly+"\n");

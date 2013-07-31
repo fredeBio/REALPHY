@@ -34,10 +34,8 @@ public class TestResult {
 	private static  ArrayList<ArrayList<Fasta>> getSequences(File seqfolder){
 		File[] list=seqfolder.listFiles();
 		ArrayList<ArrayList<Fasta>> seqs=new ArrayList<ArrayList<Fasta>>();
-		//String[] allExt=combine(RealPhy.fasExt,RealPhy.gbkExt);
 		for(int i=0;i<list.length;i++){
 			String name=list[i].getName();
-			//if(RealPhy.hasExtension(name,allExt)){
 				if(RealPhy.hasExtension(name, RealPhy.gbkExt)){
 					ReadGenbank rgb=new ReadGenbank(list[i]);
 					ArrayList<Fasta> fas=rgb.getSequence();
@@ -45,7 +43,6 @@ public class TestResult {
 				}else if(RealPhy.hasExtension(name, RealPhy.fasExt)){
 					ArrayList<Fasta> fas=Fasta.readFasta(list[i]);
 					seqs.add(fas);
-
 				}
 		}
 		return seqs;

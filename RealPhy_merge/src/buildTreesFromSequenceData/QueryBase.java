@@ -10,7 +10,7 @@ public class QueryBase implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 		//list of queryID columns filled in for each clash
-		ArrayList<ArrayList<String>> queryIDs=new ArrayList<ArrayList<String>>();
+		ArrayList<ArrayList<Integer>> queryIDs=new ArrayList<ArrayList<Integer>>();
 		//same as for querIDs but the corresponding nucleotides instead of qIDs
 		ArrayList<StringBuffer> baseColumns=new ArrayList<StringBuffer>();
 		public void addAll(QueryBase qb){
@@ -20,12 +20,12 @@ public class QueryBase implements Serializable{
 		public QueryBase(){
 			
 		}
-		public QueryBase(ArrayList<ArrayList<String>> queryIDCols,ArrayList<StringBuffer> baseCols ){
+		public QueryBase(ArrayList<ArrayList<Integer>> queryIDCols,ArrayList<StringBuffer> baseCols ){
 			this.queryIDs=queryIDCols;
 			this.baseColumns=baseCols;
 		}
 		
-		public QueryBase(ArrayList<String> queryIDColumn,StringBuffer bases ){
+		public QueryBase(ArrayList<Integer> queryIDColumn,StringBuffer bases ){
 			this.queryIDs.add(queryIDColumn);
 			this.baseColumns.add(bases);
 		}

@@ -49,7 +49,7 @@ public abstract class PointSubstitutions {
 	HashMap<String,double[]> coverage;
 	HashMap<String,double[]> coveragePos;
 	HashMap<String,double[]> coverageNeg;
-	HashMap<String,String[]> baseNames;
+	HashMap<String,ArrayList<Integer>[]> baseNames;
 
 	HashMap<String,String> fasta;
 	HashMap<String,Double> avgCov=new HashMap<String, Double>();
@@ -208,10 +208,10 @@ public abstract class PointSubstitutions {
 	public String getGene(String id){
 		return fasta.get(id);
 	}
-	public HashMap<String,String[]> getBaseNames(){
+	public HashMap<String,ArrayList<Integer>[]> getBaseNames(){
 		return baseNames;
 	}
-	public String getBaseName(String id,int pos){
+	public ArrayList<Integer> getBaseName(String id,int pos){
 		return baseNames.get(id)[pos];
 	}
 	
@@ -271,10 +271,10 @@ public abstract class PointSubstitutions {
 		return bases;
 	}
 
-	public  HashMap<String,String[]> initNames(){
-		HashMap<String,String[]> baseNames=new HashMap<String, String[]>();
+	public  HashMap<String,ArrayList<Integer>[]> initNames(){
+		HashMap<String,ArrayList<Integer>[]> baseNames=new HashMap<String, ArrayList<Integer>[]>();
 		for(int i=0;i<alName.size();i++){
-			baseNames.put(alName.get(i), new String[alLength.get(i)+1]);
+			baseNames.put(alName.get(i), new ArrayList[alLength.get(i)+1]);
 		}
 		return baseNames;
 	}
@@ -453,34 +453,20 @@ public abstract class PointSubstitutions {
 	}
 	
 	
-	
-	 String getQueryName(String readID,int subpos,char orientation,int length){
-		 String readIDsplit[]=readID.split("_");
-		 String subID="";
-		 if(readIDsplit.length>0){
-			
-			String readIDPos=readIDsplit[readIDsplit.length-1];
-			String strain=readID.substring(0,readID.length()-(readIDPos.length()+1));
-			subpos=orientation=='+'?subpos:length-(subpos+1);
-			int position=subpos+Integer.parseInt(readIDPos);
-			subID=strain+"_"+position;
+	/**
+	 * Extracts the nucleotide position in the original fasta file, given the mapping of the read.
+	 * @param readID
+	 * @param subpos
+	 * @param orientation
+	 * @param length
+	 * @return
+	 */
+	 int getQueryName(String readID,int subpos,char orientation,int length){
+		 int readIDPos=Integer.parseInt(readID);
+		 subpos=orientation=='+'?subpos:length-(subpos+1);
+		 int position=subpos+readIDPos;
 
-		}
-//		 String split[]=subID.split("_");
-//			int subCalcpos=Integer.parseInt(split[split.length-1]);
-//			if((100000-subCalcpos)!=pos){
-//				System.err.println(subCalcpos+" "+pos);
-//				try{
-//				if(System.in.read()=='e'){;
-//				throw new RuntimeException();
-//				}
-//				}catch(IOException e){
-//					System.err.println("sys does not work");
-//					System.exit(-1);
-//				}
-//			}
-
-		return subID;
+		 return position;
 		
 	}
 	
@@ -528,7 +514,7 @@ public abstract class PointSubstitutions {
 					}else{
 						int length=readSequence.length();
 						if(!bases.get(geneId).isset(sub)){
-							String subID=getQueryName(readID, mismatchRead, orientation,length);
+							int subID=getQueryName(readID, mismatchRead, orientation,length);
 							bases.get(geneId).set(sub, base,subID,weight);
 						}else{
 							bases.get(geneId).set(sub, base,weight);
@@ -570,7 +556,7 @@ public abstract class PointSubstitutions {
 				 }else{
 					 int length=readSequence.length();
 					 if(!bases.get(fastaId).isset(sub)){
-						 String subID=getQueryName(readID, mismatchRead, orientation,length);
+						 int subID=getQueryName(readID, mismatchRead, orientation,length);
 						 bases.get(fastaId).set(sub, base,subID,weight);
 					 }else{
 						 bases.get(fastaId).set(sub, base,weight);
@@ -603,10 +589,8 @@ public abstract class PointSubstitutions {
 				 }
 			 }
 			 if(subInfo){
-				 if(baseNames.get(fastaId)[i]==null){
-					 String subID=getQueryName(readID, subpos, orientation,length);
-					 baseNames.get(fastaId)[i]=subID;
-				 }
+				 
+				 addBaseNames(fastaId, i, readID, subpos, orientation, lengthSeq);
 
 			 }
 		 }
@@ -644,14 +628,20 @@ public abstract class PointSubstitutions {
 			}
 		}
 		if(subInfo&&!gap){
-			if(baseNames.get(fastaId)[sub]==null){
-				String subID=getQueryName(readID, subpos, orientation,1);
-				baseNames.get(fastaId)[sub]=subID;
-			}
-
+			addBaseNames(fastaId, sub, readID, subpos, orientation,1);
 		}
 	 }
 		 
+	 void addBaseNames(String fastaId,int sub,String readID,int subpos,char orientation,int length){
+		 int subID=getQueryName(readID, subpos, orientation,length);
+		 if(baseNames.get(fastaId)[sub]==null){
+				ArrayList<Integer> list=new ArrayList<Integer>();
+				list.add(subID);
+				baseNames.get(fastaId)[sub]=list;
+			}else{
+				baseNames.get(fastaId)[sub].add(subID);
+			}
 
+	 }
 	
 }

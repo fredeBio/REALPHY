@@ -1,14 +1,16 @@
 package buildTreesFromSequenceData;
 
+import java.util.ArrayList;
+
 public class Polymorph {
 	char base;
-	String name;
+	Integer name;
 	public Polymorph(char Base){
 		base=Base;
-		name="";
+		name=null;
 	}
-	public Polymorph(char Base,String Name){
+	public Polymorph(char Base,int i){
 		base=Base;
-		name=Name;
+		name=i;
 	}
 }

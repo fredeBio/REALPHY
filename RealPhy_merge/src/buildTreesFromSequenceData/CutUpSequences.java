@@ -174,6 +174,21 @@ public class CutUpSequences {
 		
 	}
 
+	/**
+	 * Cuts up a fasta file into "length" pieces and stores them in a fastq file. Each base quality is set to the J PHRED score. 
+	 * The reads are named after the nucleotide position in the FASTA file.
+	 * @param fasta
+	 * Fasta file that will be cut.
+	 * @param length
+	 * Length of short reads that are being produced.
+	 * @param cutFolder
+	 * The folder in which the newly created read file will be stored.
+	 * @param clean
+	 * If true, then old cut files in the cut folder will be overwritten.
+	 * @return
+	 * Returns the location of the newly created fastq file.
+	 */
+	
 	public static File cutFasta(File fasta,int length,File cutFolder,boolean clean){
 		try{
 			File idF=new File(fasta.getName());
@@ -191,14 +206,18 @@ public class CutUpSequences {
 			BufferedWriter bw=new BufferedWriter(new FileWriter(out));
 			boolean write=false;
 			int size=fas.size();
+			//counts the total number of nucleotides in the fasta file
+			//for merging purposes, hence the name of the individual contigs will be irrelevant
+			int total=0;
 			for(int j=0;j<size;j++){
 				String seq=fas.get(j).getSequence();
 				int seqLength=seq.length();
 				for(int k=0;k<=seqLength-length;k++){
 					write=true;
-					bw.write("@"+fas.get(j).getIdent().split("\\s+")[0]+"_"+k+"\n");
+					bw.write("@"+total+"\n");
 					bw.write(seq.substring(k,k+length)+"\n");
 					bw.write("+\n");
+					total++;
 					for(int m=0;m<length;m++)
 						bw.write("J");
 					bw.write("\n");

@@ -14,13 +14,28 @@ import util.phylogenetics.Alignment;
 
 public class Clashes implements Serializable{
 
-
+	public class Pair{
+		int genomePos;
+		int colPos;
+		public Pair(){
+		}
+		public Pair setColPos(int colPos){
+			this.colPos=colPos;
+			return this;
+		}
+		public Pair setGenomePos(int genomePos){
+			this.genomePos=genomePos;
+			return this;
+		}
+		
+		
+	}
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	//is filled out after program has found all the clashes, contains the position of each queryID in the column list
-	HashMap<String,ArrayList<Integer>> posCol=new HashMap<String, ArrayList<Integer>>();
+	HashMap</*position in column*/Integer,HashMap<Integer/*position in genome*/,ArrayList<Integer>>> posCol=new HashMap<Integer,HashMap<Integer, ArrayList<Integer>>>();
 	//filled out after program has found all clashes, updated every time a clash has been resolved, indicates the positions in the AL that have been resolved
 	HashMap<Integer,Boolean> resolved=new HashMap<Integer, Boolean>();
 	//number of positions of unresolved clashes, is filled in after all clashes have been found and gradually decreases as clashes get resolved
@@ -32,7 +47,7 @@ public class Clashes implements Serializable{
 	QueryBase qb=new QueryBase();
 	
 	//counts the number of identical columns
-	HashMap<ArrayList<String>,Integer> count=new HashMap<ArrayList<String>, Integer>();
+	HashMap<ArrayList<Integer>,Integer> count=new HashMap<ArrayList<Integer>, Integer>();
 	
 	//needed for alignment output!
 	ArrayList<String> idents=new ArrayList<String>();
@@ -41,7 +56,7 @@ public class Clashes implements Serializable{
 		this.idents=idents;
 	}
 	
-	public ArrayList<String> getQIDColumn(int pos){
+	public ArrayList<Integer> getQIDColumn(int pos){
 		return qb.queryIDs.get(pos);
 	}
 	
@@ -49,11 +64,11 @@ public class Clashes implements Serializable{
 		return qb.baseColumns.get(pos);
 	}
 	
-	public void addColumn(ArrayList<String> qIDCol,StringBuffer bases){
+	public void addColumn(ArrayList<Integer> queryIDColumn,StringBuffer bases){
 
-		if(!count.containsKey(qIDCol)){
-			count.put((qIDCol), 1);
-			qb.queryIDs.add(qIDCol);
+		if(!count.containsKey(queryIDColumn)){
+			count.put((queryIDColumn), 1);
+			qb.queryIDs.add(queryIDColumn);
 			qb.baseColumns.add(bases);
 			unresolved.add(qb.queryIDs.size()-1);;
 
@@ -62,7 +77,7 @@ public class Clashes implements Serializable{
 //			}
 		}else{
 			//String q=toString(qIDCol);
-			count.put(qIDCol, count.get(qIDCol)+1);
+			count.put(queryIDColumn, count.get(queryIDColumn)+1);
 		}
 	}
 	
@@ -102,16 +117,18 @@ public class Clashes implements Serializable{
 	//takes a random column out of the list of clashed columns as well as all other columns in which one of the involved column IDs is found
 	//it then calculates the consensus of all these columns and stores it in Column format
 	private QueryBase resolveClash(int rand){
-		ArrayList<String> qIDs=qb.queryIDs.get(rand);
+		ArrayList<Integer> qIDs=qb.queryIDs.get(rand);
 		ArrayList<StringBuffer> basesCons=new ArrayList<StringBuffer>();
-		ArrayList<ArrayList<String>> qIDCons=new ArrayList<ArrayList<String>>();
-		for(int i=0;i<qIDs.size();i++){			
-			ArrayList<Integer> positions=posCol.get(qIDs.get(i));
+		ArrayList<ArrayList<Integer>> qIDCons=new ArrayList<ArrayList<Integer>>();
+		for(int i=0;i<qIDs.size();i++){		
+			
+			ArrayList<Integer> positions=posCol.get(i).get(qIDs.get(i));
+			//System.out.println(i+" "+qIDs.get(i));
 			for(int j=0;j<positions.size();j++){
 				int pos=positions.get(j);
 				if(!resolved.containsKey(pos)){
 					resolved.put(pos,true);
-					ArrayList<String> columns=qb.queryIDs.get(pos);
+					ArrayList<Integer> columns=qb.queryIDs.get(pos);
 					StringBuffer bases=qb.baseColumns.get(pos);
 					int c=count.get((columns));
 					for(int k=0;k<c;k++){
@@ -164,7 +181,7 @@ public class Clashes implements Serializable{
 		resolved=new HashMap<Integer, Boolean>();
 
 		for(int i=0;i<newClashes.size();i++){
-			ArrayList<String> col=newClashes.getQIDColumn(i);
+			ArrayList<Integer> col=newClashes.getQIDColumn(i);
 			int c=newClashes.count.get((col));
 			for(int j=0;j<c;j++){
 				addColumn(newClashes.getQIDColumn(i), newClashes.getBaseColumn(i));
@@ -215,22 +232,22 @@ public class Clashes implements Serializable{
 	 * @return
 	 */
 	
-	private QueryBase getConsensus(ArrayList<StringBuffer> bases,ArrayList<ArrayList<String>> qIDs){
-		ArrayList<String> qIDsCons=new ArrayList<String>();
+	private QueryBase getConsensus(ArrayList<StringBuffer> bases,ArrayList<ArrayList<Integer>> qIDs){
+		ArrayList<Integer> qIDsCons=new ArrayList<Integer>();
 		StringBuffer basesCons=new StringBuffer();
-		HashMap<String,Integer> colHash=new HashMap<String, Integer>();
+		HashMap<Integer,Integer> colHash=new HashMap<Integer, Integer>();
 		ArrayList<String> baseCols=initbaseCols(bases);
 
 			for(int j=0;j<baseCols.get(0).length();j++){
 				HashMap<Character,Integer> baseHash=new HashMap<Character, Integer>();
 				for(int i=0;i<qIDs.size();i++){
 					String baseCol=baseCols.get(i);
-					ArrayList<String> col=qIDs.get(i);
+					ArrayList<Integer> col=qIDs.get(i);
 					char c=baseCol.charAt(j);
 					
 					enterItem(baseHash,c);
 					if(j<col.size()){
-						String qID=col.get(j);
+						Integer qID=col.get(j);
 						enterItem(colHash,qID);
 					}
 				}
@@ -268,14 +285,25 @@ public class Clashes implements Serializable{
 	 */
 	private void createPosCol(int start){
 		for(int i=start;i<qb.queryIDs.size();i++){
-			ArrayList<String> col=qb.queryIDs.get(i);
+			ArrayList<Integer> col=qb.queryIDs.get(i);
 			for(int j=0;j<col.size();j++){
-				if(posCol.containsKey(col.get(j))){
-					posCol.get(col.get(j)).add(i);
+				int colPos=j;
+				int genomePos=col.get(j);
+				
+				if(posCol.containsKey(colPos)){
+					if(posCol.get(colPos).containsKey(genomePos)){
+						posCol.get(colPos).get(genomePos).add(i);
+					}else{
+						ArrayList<Integer> temp=new ArrayList<Integer>();
+						temp.add(i);
+						posCol.get(colPos).put(genomePos,temp);
+					}
 				}else{
 					ArrayList<Integer> al=new ArrayList<Integer>();
 					al.add(i);
-					posCol.put(col.get(j),al);
+					HashMap<Integer,ArrayList<Integer>> hm=new HashMap<Integer, ArrayList<Integer>>();
+					hm.put(genomePos,al);
+					posCol.put(colPos,hm);
 				}
 			}
 		}
