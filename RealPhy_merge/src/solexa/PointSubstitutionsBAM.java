@@ -1,9 +1,8 @@
 package solexa;
 
 import java.io.*;
-import java.util.ArrayList;
+import java.util.*;
 
-import util.Info;
 
 import net.sf.samtools.*;
 
@@ -94,7 +93,6 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 					gap=false;
 				}
 				if(regionsRef.charAt(i)=='m'){
-					//TODO flanking not taken care of!!!
 					setCoverageSingle(pos, readPos, fastaId, sequence,qualityString, quality, orientation, subInfo, readID,weight,gap,flank);
 					if(gap){
 						setGap(sequence, readPos, pos-posorig, readID, orientation, posorig, flank, fastaId, subInfo, weight);
@@ -111,7 +109,6 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 					gap=false;
 				}
 				if(regionsRef.charAt(i)=='m'){
-					//TODO flanking not taken care of!!!
 					setCoverageSingle(pos, readPos, fastaId, sequence,qualityString, quality, orientation, subInfo, readID,weight,gap,flank);
 					if(gap){
 						setGap(sequence, readPos, pos-posorig, readID, orientation, posorig, flank, fastaId, subInfo, weight);

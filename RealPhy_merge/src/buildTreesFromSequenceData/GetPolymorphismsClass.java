@@ -10,9 +10,7 @@ import solexa.Arrays;
 import util.*;
 
 
-
 public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializable{
-	
 	/**
 	 * 
 	 */
@@ -24,7 +22,7 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 	ArrayList<Genes> genePoly=new ArrayList<Genes>();
 	HashMap<String /*strain*/,HashMap<String /*geneID*/,HashMap<Integer/*position*/,Polymorph/*poly*/>>> strains=new HashMap<String, HashMap<String,HashMap<Integer,Polymorph>>>();
 
-	HashMap<String,HashMap<String,ArrayList<Integer>[]>> baseNames=new HashMap<String, HashMap<String,ArrayList<Integer>[]>>();
+	HashMap<String,HashMap<String,HashMap<Integer,Integer>[]>> baseNames=new HashMap<String, HashMap<String,HashMap<Integer,Integer>[]>>();
 	File Reference=null;
 	int flank=0;
 	int quality=20;
@@ -332,7 +330,7 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 					
 					//id it is not one of the reference strains then skip this step
 					if(!baseNames.containsKey(sorted[j]))continue;
-					ArrayList<Integer>[] GeneBaseNames=baseNames.get(sorted[j]).get(gene.geneID);
+					HashMap<Integer,Integer>[] GeneBaseNames=baseNames.get(sorted[j]).get(gene.geneID);
 
 					int queryID;
 					if(polies.containsKey(pos)){
@@ -360,26 +358,17 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 		return columns;
 
 	}
-	int getMajority(ArrayList<Integer> list){
-		HashMap<Integer,Integer> hm=new HashMap<Integer, Integer>();
+	int getMajority(HashMap<Integer, Integer> hashMap){
+		Iterator<Entry<Integer,Integer>> it=hashMap.entrySet().iterator();
 		int max=0;
 		int maxItem=-1;
-		for(int i=0;i<list.size();i++){
-			int item=list.get(i);
-			if(hm.containsKey(item)){
-				int count=hm.get(item)+1;
-				hm.put(item, count);
-				if(max<count){
-					max=count;
-					maxItem=item;
-				}
-			}else{
-				hm.put(item, 1);
-				if(max==0){
-					max=1;
-					maxItem=item;
-				}
+		while(it.hasNext()){
+			Entry<Integer,Integer> e=it.next();
+			if(e.getValue()>max){
+				max=e.getValue();
+				maxItem=e.getKey();
 			}
+			
 		}
 		return maxItem;
 		

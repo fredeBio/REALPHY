@@ -143,11 +143,11 @@ public class Clashes implements Serializable{
 		if(basesCons.size()>0){
 			
 			consense=getConsensus(basesCons,qIDCons);
-			if(basesCons.size()>1&&!basesCons.get(0).equals(basesCons.get(1))){
+			/*if(basesCons.size()>1&&!basesCons.get(0).equals(basesCons.get(1))){
 				System.out.println("all: "+qIDCons);
 				System.out.println("all: "+basesCons);
 				System.out.println("consense: "+consense.baseColumns);
-			}
+			}*/
 		}else{
 			/*		System.out.println(rand);
 			System.out.println(qb.queryIDs.get(rand));

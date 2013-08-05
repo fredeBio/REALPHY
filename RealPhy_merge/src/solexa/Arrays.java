@@ -1,7 +1,7 @@
 package solexa;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.*;
 
 
 public class Arrays implements Serializable{
@@ -12,12 +12,12 @@ public class Arrays implements Serializable{
 	private static final long serialVersionUID = 1L;
 	double[][] array;
 	double[] cov;
-	ArrayList<Integer>[] queryID;	
+	HashMap<Integer,Integer>[] queryID;	
 	public final int length;
 	public Arrays(int Length){
 		length=Length;
 		array=new double [length][10];
-		queryID=new ArrayList[length];
+		queryID=new HashMap[length];
 	}
 	
 	public void setCoverage(double[] Coverage){
@@ -59,11 +59,15 @@ public class Arrays implements Serializable{
 	public void set(int pos,String base,int readPos,double weight){
 		set(pos,base,weight);
 		if(queryID[pos]==null){
-			ArrayList<Integer> temp=new ArrayList<Integer>();
-			temp.add(readPos);
+			HashMap<Integer,Integer> temp=new HashMap<Integer,Integer>();
+			temp.put(readPos,1);
 			queryID[pos]=temp;
 		}else{
-			queryID[pos].add(readPos);
+			if(queryID[pos].containsKey(readPos)){
+				int item=queryID[pos].get(readPos);
+				item++;
+				queryID[pos].put(readPos,item);
+			}
 		}
 	}
 	
@@ -110,7 +114,7 @@ public class Arrays implements Serializable{
 		return (numBases(pos)*1.0)/(cov[pos]*1.0);
 	}
 	
-	public ArrayList<Integer> getQueryID(int pos){
+	public HashMap<Integer,Integer> getQueryID(int pos){
 		return queryID[pos];
 	}
 	public int getMaxNuc(int pos){

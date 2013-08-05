@@ -49,7 +49,7 @@ public abstract class PointSubstitutions {
 	HashMap<String,double[]> coverage;
 	HashMap<String,double[]> coveragePos;
 	HashMap<String,double[]> coverageNeg;
-	HashMap<String,ArrayList<Integer>[]> baseNames;
+	HashMap<String,HashMap<Integer,Integer>[]> baseNames;
 
 	HashMap<String,String> fasta;
 	HashMap<String,Double> avgCov=new HashMap<String, Double>();
@@ -208,10 +208,10 @@ public abstract class PointSubstitutions {
 	public String getGene(String id){
 		return fasta.get(id);
 	}
-	public HashMap<String,ArrayList<Integer>[]> getBaseNames(){
+	public HashMap<String,HashMap<Integer,Integer>[]> getBaseNames(){
 		return baseNames;
 	}
-	public ArrayList<Integer> getBaseName(String id,int pos){
+	public HashMap<Integer,Integer> getBaseName(String id,int pos){
 		return baseNames.get(id)[pos];
 	}
 	
@@ -271,10 +271,10 @@ public abstract class PointSubstitutions {
 		return bases;
 	}
 
-	public  HashMap<String,ArrayList<Integer>[]> initNames(){
-		HashMap<String,ArrayList<Integer>[]> baseNames=new HashMap<String, ArrayList<Integer>[]>();
+	public  HashMap<String, HashMap<Integer, Integer>[]> initNames(){
+		HashMap<String,HashMap<Integer,Integer>[]> baseNames=new HashMap<String, HashMap<Integer,Integer>[]>();
 		for(int i=0;i<alName.size();i++){
-			baseNames.put(alName.get(i), new ArrayList[alLength.get(i)+1]);
+			baseNames.put(alName.get(i), new HashMap[alLength.get(i)+1]);
 		}
 		return baseNames;
 	}
@@ -634,14 +634,18 @@ public abstract class PointSubstitutions {
 		 
 	 void addBaseNames(String fastaId,int sub,String readID,int subpos,char orientation,int length){
 		 int subID=getQueryName(readID, subpos, orientation,length);
-		 if(baseNames.get(fastaId)[sub]==null){
-				ArrayList<Integer> list=new ArrayList<Integer>();
-				list.add(subID);
-				baseNames.get(fastaId)[sub]=list;
-			}else{
-				baseNames.get(fastaId)[sub].add(subID);
-			}
 
+		 if(baseNames.get(fastaId)[sub]==null){
+				HashMap<Integer,Integer> temp=new HashMap<Integer,Integer>();
+				temp.put(subID,1);
+				baseNames.get(fastaId)[sub]=temp;
+			}else{
+				if(baseNames.get(fastaId)[sub].containsKey(subID)){
+					int item=baseNames.get(fastaId)[sub].get(subID);
+					item++;
+					baseNames.get(fastaId)[sub].put(subID,item);
+				}
+			}
 	 }
 	
 }
