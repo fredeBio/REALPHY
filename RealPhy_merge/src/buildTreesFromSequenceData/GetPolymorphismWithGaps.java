@@ -26,8 +26,8 @@ import util.*;
 
 
 
-		public GetPolymorphismWithGaps(ArrayList<File> alignmentFiles,ArrayList<String> references,File ReferenceFas,int Flank,int Quality,double PolymorphismThreshold,double fractionCovThreshold,int PerBaseCoverage,boolean subInfo,boolean NoGenes,double gapThreshold,boolean printInvariant,File outFolder) {
-			super(alignmentFiles,references,ReferenceFas,Flank,Quality,PolymorphismThreshold,fractionCovThreshold,PerBaseCoverage, subInfo,NoGenes,printInvariant, outFolder,true,gapThreshold);
+		public GetPolymorphismWithGaps(ArrayList<File> alignmentFiles,ArrayList<String> references,File ReferenceFas,int Flank,int Quality,double PolymorphismThreshold,double fractionCovThreshold,int PerBaseCoverage,boolean subInfo,boolean NoGenes,double gapThreshold,boolean printInvariant,File outFolder,String reference) {
+			super(alignmentFiles,references,ReferenceFas,Flank,Quality,PolymorphismThreshold,fractionCovThreshold,PerBaseCoverage, subInfo,NoGenes,printInvariant, outFolder,true,gapThreshold,reference);
 			
 			
 

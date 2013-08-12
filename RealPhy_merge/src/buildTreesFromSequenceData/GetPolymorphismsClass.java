@@ -35,6 +35,7 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 	File outFolder;
 	double gapThreshold=0;
 	boolean allowGaps=true;
+	String reference;
 	private static final HashMap<Character,Boolean> ATGC=new HashMap<Character, Boolean>();
 
 	static {
@@ -120,7 +121,7 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
     	}
     	return tm;
     }
-	public GetPolymorphismsClass(ArrayList<File> soapFiles,ArrayList<String> references,File ReferenceFas,int Flank,int Quality,double PolymorphismThreshold,double FractionCovThreshold,int PerBaseCoverage,boolean subInfo,boolean NoGenes,boolean PrintInvariant,File OutFolder,boolean addReference,double gapThreshold) {
+	public GetPolymorphismsClass(ArrayList<File> soapFiles,ArrayList<String> references,File ReferenceFas,int Flank,int Quality,double PolymorphismThreshold,double FractionCovThreshold,int PerBaseCoverage,boolean subInfo,boolean NoGenes,boolean PrintInvariant,File OutFolder,boolean addReference,double gapThreshold,String ref) {
 		Reference=ReferenceFas;
 		genes=!NoGenes;
 		flank=Flank;
@@ -132,6 +133,7 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 		outFolder=OutFolder;
 		this.gapThreshold=gapThreshold;
 		calculatePolymorphisms(soapFiles,references,subInfo,addReference);
+		reference=ref;
 
 	}
     
@@ -199,9 +201,9 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
         		int strainPolymorphisms=getStrainPolymorphisms(strainPolies);
         		double proportionMutations=strainPolymorphisms/(numberMappedSites*1.0);
         		bw.write(strainExtern+"|"+numberMappedSites+"|"+strainPolymorphisms+"|"+proportionMutations+"\n");//"|"+samplingBias+"\n");
+        		
 
-
-        		System.out.println(strainExtern+"\t"+numberMappedSites+"/"+refLength);
+        		System.out.println(strainExtern+"\t"+numberMappedSites+"/"+refLength);//+(Runtime.getRuntime().totalMemory()/1048576)+"MB");
         		while(sortedFiles.containsKey(numberMappedSites)){
         			numberMappedSites+=1;
         		}
@@ -226,7 +228,7 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
         		}
         		int numberPolies=getNumberPolies();
         		int mappedSites=pss.getMappedSites(perBaseCoverage);
-        		System.out.println(strainExtern+"\t"+mappedSites+"/"+refLength+"|"+numberPolies);
+        		System.out.println(strainExtern+"\t"+mappedSites+"/"+refLength+"|"+numberPolies);//"|"+(Runtime.getRuntime().totalMemory()/1048576)+"MB");
         		bwCore.write(strainExtern+"\t"+mappedSites+"/"+refLength+"|"+numberPolies+"\n");
         	}
         	writeCoverage(new File(outFolder+"/coverage.txt"));
@@ -299,7 +301,16 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 		return newList;
 	}
 	
-	
+	private int getReferencePos(ArrayList<String> sorted){
+		for(int i=0;i<sorted.size();i++){
+			//System.out.println(sorted.get(i));
+			if(sorted.get(i).equals(reference)){
+				return i;
+			}
+		}
+		System.err.println("Could not find reference "+reference);
+		throw new RuntimeException();
+	}
 	
 	public Clashes calculateColumns(){
 		
@@ -307,7 +318,9 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 		String[] strainListIntern=strains.keySet().toArray(new String[0]);
 		TreeMap<String,Boolean> sortedStrains=fillTreeMap(strainListIntern);
 		String[] sorted=sortedStrains.keySet().toArray(new String[0]);
-		Clashes columns=new Clashes(toExtern(sorted));
+		ArrayList<String> sortedEx=toExtern(sorted);
+		int ref=getReferencePos(sortedEx);
+		Clashes columns=new Clashes(sortedEx);
 		for(int i=0;i<genePoly.size();i++){
 			Genes gene=genePoly.get(i);
 			Iterator<Entry<Integer,Character>> it2= gene.polymorphisms.entrySet().iterator();
@@ -351,7 +364,7 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 					queryIDColumn.add(queryID);
 				}
 				if(printInvariant||addition){
-					columns.addColumn(queryIDColumn, baseColumn);
+					columns.addColumn(queryIDColumn, baseColumn,ref);
 				}
 			}
 		}

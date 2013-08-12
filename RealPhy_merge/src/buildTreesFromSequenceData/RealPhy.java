@@ -206,7 +206,7 @@ public class RealPhy {
 			}
 			ArrayList<File> alignmentFiles=getAlignments();
 			System.out.println("Determine SNPs...");
-			File polymorphismsFas=getPolymorphisms(alignmentFiles, core);
+			File polymorphismsFas=getPolymorphisms(alignmentFiles, core,refs.get(i));
 			buildTree(polymorphismsFas);		
 			if(delete){
 				
@@ -381,7 +381,7 @@ public class RealPhy {
 			File columnsFile=new File(outFolder+"/"+refs.get(i)+"_columns.obj");
 			if(!columnsFile.exists()){
 				ArrayList<File> alignmentFiles=getAlignments();
-				GetPolymorphisms gps=getColumns(alignmentFiles, core);
+				GetPolymorphisms gps=getColumns(alignmentFiles, core,refs.get(i));
 				System.out.println("Determining polymorphic columns...");
 				Clashes columns=gps.calculateColumns();
 				ObjectIO.writeObject(columnsFile,columns);
@@ -554,10 +554,10 @@ public class RealPhy {
 		}
 		folder.delete();
 	}
-	public GetPolymorphisms getColumns(ArrayList<File> alignmentFiles,File core){
+	public GetPolymorphisms getColumns(ArrayList<File> alignmentFiles,File core,String ref){
 		//determine polymorphisms
 		System.out.println("Determine polymorphisms...");
-		GetPolymorphisms GPS=new GetPolymorphismWithGaps(alignmentFiles,refs, core, flank, (Integer)arguments.get("quality"), (Double)arguments.get("polyThreshold"), (Double)arguments.get("fractionCov"), perBaseCov,(Boolean)arguments.get("merge"),(Boolean)arguments.get("noGenes"),gapThreshold,(Boolean)arguments.get("invar"),polymorphismsOutFolder);
+		GetPolymorphisms GPS=new GetPolymorphismWithGaps(alignmentFiles,refs, core, flank, (Integer)arguments.get("quality"), (Double)arguments.get("polyThreshold"), (Double)arguments.get("fractionCov"), perBaseCov,(Boolean)arguments.get("merge"),(Boolean)arguments.get("noGenes"),gapThreshold,(Boolean)arguments.get("invar"),polymorphismsOutFolder,ref);
 
 		File polymorphismsFas=GPS.writeSequences(); 
 		System.out.println("Building tree...");
@@ -565,10 +565,10 @@ public class RealPhy {
 		return GPS;
 	} 
 	
-	public File getPolymorphisms(ArrayList<File> alignmentFiles,File core){
+	public File getPolymorphisms(ArrayList<File> alignmentFiles,File core,String ref){
 		//determine polymorphisms
 
-		GetPolymorphisms GPS=new GetPolymorphismWithGaps(alignmentFiles, refs,core, flank, (Integer)arguments.get("quality"), (Double)arguments.get("polyThreshold"), (Double)arguments.get("fractionCov"), perBaseCov,(Boolean)arguments.get("merge"),(Boolean)arguments.get("noGenes"),gapThreshold,(Boolean)arguments.get("invar"),polymorphismsOutFolder);
+		GetPolymorphisms GPS=new GetPolymorphismWithGaps(alignmentFiles, refs,core, flank, (Integer)arguments.get("quality"), (Double)arguments.get("polyThreshold"), (Double)arguments.get("fractionCov"), perBaseCov,(Boolean)arguments.get("merge"),(Boolean)arguments.get("noGenes"),gapThreshold,(Boolean)arguments.get("invar"),polymorphismsOutFolder,ref);
 
 		File polymorphismsFas=GPS.writeSequences();
 		return polymorphismsFas;
