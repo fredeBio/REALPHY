@@ -301,11 +301,17 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 		return newList;
 	}
 	
-	private int getReferencePos(ArrayList<String> sorted){
+
+	
+	private int getReferencePos(ArrayList<String> sorted,String[] sortedInt){
+		int refNum=0;
 		for(int i=0;i<sorted.size();i++){
 			//System.out.println(sorted.get(i));
 			if(sorted.get(i).equals(reference)){
-				return i;
+				return refNum;
+			}
+			if(baseNames.containsKey(sortedInt[i])){
+				refNum++;
 			}
 		}
 		System.err.println("Could not find reference "+reference);
@@ -319,7 +325,7 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 		TreeMap<String,Boolean> sortedStrains=fillTreeMap(strainListIntern);
 		String[] sorted=sortedStrains.keySet().toArray(new String[0]);
 		ArrayList<String> sortedEx=toExtern(sorted);
-		int ref=getReferencePos(sortedEx);
+		int ref=getReferencePos(sortedEx,sorted);
 		Clashes columns=new Clashes(sortedEx);
 		for(int i=0;i<genePoly.size();i++){
 			Genes gene=genePoly.get(i);
