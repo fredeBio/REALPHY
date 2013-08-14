@@ -42,7 +42,7 @@ public class Clashes implements Serializable{
 	 * this means that a column ID can only refer to a single position in the query ID array and this is the position where this position was the reference
 	 */
 
-	HashMap</*position in column*/Integer,HashMap<Integer/*position in genome*/,Integer>> posCol=new HashMap<Integer,HashMap<Integer, Integer>>();
+	HashMap</*position in column*/Integer,HashMap<Integer/*position in genome*/,ArrayList<Integer>>> posCol=new HashMap<Integer,HashMap<Integer, ArrayList<Integer>>>();
 	//filled out after program has found all clashes, updated every time a clash has been resolved, indicates the positions in the AL that have been resolved
 	HashMap<Integer,Boolean> resolved=new HashMap<Integer, Boolean>();
 	//number of positions of unresolved clashes, is filled in after all clashes have been found and gradually decreases as clashes get resolved
@@ -131,23 +131,26 @@ public class Clashes implements Serializable{
 		ArrayList<ArrayList<Integer>> qIDCons=new ArrayList<ArrayList<Integer>>();
 		for(int i=0;i<qIDs.size();i++){		
 			if(posCol.get(i).containsKey(qIDs.get(i))){
-				int pos=posCol.get(i).get(qIDs.get(i));
-				if(!resolved.containsKey(pos)){
-					
-					ArrayList<Integer> columns=qb.queryIDs.get(pos);
-					StringBuffer bases=qb.baseColumns.get(pos);
-					ArrayList<Integer> p=count.get((columns));
-					for(int k=0;k<p.size();k++){
-						if(p.get(k)==i){
-							basesCons.add(bases);
-							qIDCons.add(columns);
-							p.remove(k);
-							break;
+				ArrayList<Integer> pos=posCol.get(i).get(qIDs.get(i));
+				for(int j=0;j<pos.size();j++){
+					if(!resolved.containsKey(pos.get(j))){
+
+						ArrayList<Integer> columns=qb.queryIDs.get(pos.get(j));
+						StringBuffer bases=qb.baseColumns.get(pos.get(j));
+						ArrayList<Integer> p=count.get((columns));
+						for(int k=0;k<p.size();k++){
+							if(p.get(k)==i){
+								basesCons.add(bases);
+								qIDCons.add(columns);
+								p.remove(k);
+								break;
+							}
+
 						}
-						
-					}
-					if(p.size()==0){
-						resolved.put(pos,true);;
+						if(p.size()==0){
+							resolved.put(pos.get(j),true);;
+						}
+
 					}
 
 				}
@@ -155,17 +158,17 @@ public class Clashes implements Serializable{
 		}
 		QueryBase consense=null;
 		if(basesCons.size()>0){
-			int size=basesCons.size();
+//			int size=basesCons.size();
 			
 			consense=getConsensus(basesCons,qIDCons);
-			if(consHM.containsKey(consense.queryIDs.get(0).get(0))){
-				System.err.println("PROBLEM "+consense.queryIDs.get(0).get(0));
-				//System.exit(-1);
-
-				consHM.put(consense.queryIDs.get(0).get(0), consHM.get(consense.queryIDs.get(0).get(0))+1);
-			}else{
-				consHM.put(consense.queryIDs.get(0).get(0),1);
-			}
+//			if(consHM.containsKey(consense.queryIDs.get(0).get(0))){
+//				System.err.println("PROBLEM "+consense.queryIDs.get(0).get(0));
+//				//System.exit(-1);
+//
+//				consHM.put(consense.queryIDs.get(0).get(0), consHM.get(consense.queryIDs.get(0).get(0))+1);
+//			}else{
+//				consHM.put(consense.queryIDs.get(0).get(0),1);
+//			}
 			/*if(basesCons.size()>1&&!basesCons.get(0).equals(basesCons.get(1))){
 				System.out.println("all: "+qIDCons);
 				System.out.println("all: "+basesCons);
@@ -317,16 +320,20 @@ public class Clashes implements Serializable{
 
 				if(posCol.containsKey(colPos)){
 					if(posCol.get(colPos).containsKey(genomePos)){
-						System.err.println("There is something wrong. It is not possible that one query position refers to two different reference positions!");
-						System.exit(-1);
-						//posCol.get(colPos).get(genomePos).add(i);
+						//System.err.println("There is something wrong. It is not possible that one query position refers to two different reference positions!");
+						//System.exit(-1);
+						//this is possible since the reference is also mapped to the reference...
+						posCol.get(colPos).get(genomePos).add(i);
 					}else{
-						posCol.get(colPos).put(genomePos,i);
+						ArrayList<Integer> temp=new ArrayList<Integer>();
+						temp.add(i);
+						posCol.get(colPos).put(genomePos,temp);
 					}
 				}else{
-
-					HashMap<Integer,Integer> hm=new HashMap<Integer, Integer>();
-					hm.put(genomePos,i);
+					ArrayList<Integer> temp=new ArrayList<Integer>();
+					temp.add(i);
+					HashMap<Integer,ArrayList<Integer>> hm=new HashMap<Integer, ArrayList<Integer>>();
+					hm.put(genomePos,temp);
 					posCol.put(colPos,hm);
 				}
 			}
