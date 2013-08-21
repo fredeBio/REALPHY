@@ -210,7 +210,7 @@ public class Clashes implements Serializable{
 			ArrayList<Integer> col=newClashes.getQIDColumn(i);
 			ArrayList<Integer> p=newClashes.count.get((col));
 			for(int j=0;j<p.size();j++){
-				addColumn(newClashes.getQIDColumn(i), newClashes.getBaseColumn(i),p.get(j));
+				addColumn(col, newClashes.getBaseColumn(i),p.get(j));
 				
 			}
 		}
@@ -379,6 +379,7 @@ public class Clashes implements Serializable{
 	 */
 	public  void mergeFiles(ArrayList<File> clashObjectFiles){
 		for(int i=0;i<clashObjectFiles.size();i++){
+			System.out.println("Loading and merging "+clashObjectFiles.get(i).getName()+".");
 			this.addAll((Clashes)ObjectIO.readObject(clashObjectFiles.get(i)));
 			
 		}
