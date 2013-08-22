@@ -54,7 +54,7 @@ public class Clashes implements Serializable{
 	QueryBase qb=new QueryBase();
 	
 	//counts the number of identical columns
-	HashMap<ArrayList<Integer>,ArrayList<Integer>> count=new HashMap<ArrayList<Integer>, ArrayList<Integer>>();
+	HashMap<ArrayList<Integer>,ArrayList<Byte>> count=new HashMap<ArrayList<Integer>, ArrayList<Byte>>();
 	
 	//needed for alignment output!
 	ArrayList<String> idents=new ArrayList<String>();
@@ -71,22 +71,20 @@ public class Clashes implements Serializable{
 		return qb.baseColumns.get(pos);
 	}
 	
-	public void addColumn(ArrayList<Integer> queryIDColumn,StringBuffer bases,int ref){
+	public void addColumn(ArrayList<Integer> queryIDColumn,StringBuffer bases,byte ref){
 
 		if(!count.containsKey(queryIDColumn)){
-			ArrayList<Integer> p=new ArrayList<Integer>();
+			ArrayList<Byte> p=new ArrayList<Byte>();
 			p.add(ref);
 			count.put((queryIDColumn), p);
 			qb.queryIDs.add(queryIDColumn);
 			qb.baseColumns.add(bases);
 			unresolved.add(qb.queryIDs.size()-1);;
 
-//			for(int i=0;i<qIDCol.size();i++){
-//				clashes.put(qIDCol.get(i),true);
-//			}
 		}else{
-			//String q=toString(qIDCol);
+
 			count.get(queryIDColumn).add(ref);
+			
 		}
 	}
 	
@@ -137,7 +135,7 @@ public class Clashes implements Serializable{
 
 						ArrayList<Integer> columns=qb.queryIDs.get(pos.get(j));
 						StringBuffer bases=qb.baseColumns.get(pos.get(j));
-						ArrayList<Integer> p=count.get((columns));
+						ArrayList<Byte> p=count.get((columns));
 						for(int k=0;k<p.size();k++){
 							if(p.get(k)==i){
 								basesCons.add(bases);
@@ -205,15 +203,17 @@ public class Clashes implements Serializable{
 	 */
 	public void addAll(Clashes newClashes){
 		resolved=new HashMap<Integer, Boolean>();
-
 		for(int i=0;i<newClashes.size();i++){
 			ArrayList<Integer> col=newClashes.getQIDColumn(i);
-			ArrayList<Integer> p=newClashes.count.get((col));
+			ArrayList<Byte> p=newClashes.count.get((col));
+			StringBuffer baseColumn=newClashes.getBaseColumn(i);
 			for(int j=0;j<p.size();j++){
-				addColumn(col, newClashes.getBaseColumn(i),p.get(j));
+				addColumn(col,baseColumn ,p.get(j));
 				
 			}
+		
 		}
+
 		//System.out.println("Clash Size: "+this.size()+" "+unresolved.size());
 
 	}
@@ -311,7 +311,7 @@ public class Clashes implements Serializable{
 	private void createPosCol(int start){
 		for(int i=start;i<qb.queryIDs.size();i++){
 			ArrayList<Integer> col=qb.queryIDs.get(i);
-			ArrayList<Integer> refs=count.get(col);
+			ArrayList<Byte> refs=count.get(col);
 			for(int j=0;j<refs.size();j++){
 				int ref=refs.get(j);
 
@@ -360,10 +360,12 @@ public class Clashes implements Serializable{
 	 * **/
 
 	public void printAlignment(File out){
+
 		QueryBase resolved=resolveClashes();
 		Alignment alg=new Alignment();
 		alg.changeIdents(idents);
 		resolved.sort();
+
 		//resolved.addGaps();
 		for(int i=0;i<resolved.length();i++){
 			alg.addColumn(resolved.baseColumns.get(i).toString());
@@ -378,9 +380,12 @@ public class Clashes implements Serializable{
 	 * @param clashObjectFiles
 	 */
 	public  void mergeFiles(ArrayList<File> clashObjectFiles){
-		for(int i=0;i<clashObjectFiles.size();i++){
-			System.out.println("Loading and merging "+clashObjectFiles.get(i).getName()+".");
-			this.addAll((Clashes)ObjectIO.readObject(clashObjectFiles.get(i)));
+		int size=clashObjectFiles.size();
+		for(int i=0;i<size;i++){
+			System.out.println(Runtime.getRuntime().totalMemory());
+			System.out.println("Loading and merging "+clashObjectFiles.get(i).getName()+" "+i+" out of "+size+".");
+			Clashes c=(Clashes)ObjectIO.readObject(clashObjectFiles.get(i));
+			this.addAll(c);
 			
 		}
 	}
