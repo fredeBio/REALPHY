@@ -54,7 +54,7 @@ public class Clashes implements Serializable{
 	QueryBase qb=new QueryBase();
 	
 	//counts the number of identical columns
-	HashMap<ArrayList<Integer>,ArrayList<Byte>> count=new HashMap<ArrayList<Integer>, ArrayList<Byte>>();
+	HashMap<ArrayList<Integer>,ArrayList<Integer>> count=new HashMap<ArrayList<Integer>, ArrayList<Integer>>();
 	
 	//needed for alignment output!
 	ArrayList<String> idents=new ArrayList<String>();
@@ -71,10 +71,10 @@ public class Clashes implements Serializable{
 		return qb.baseColumns.get(pos);
 	}
 	
-	public void addColumn(ArrayList<Integer> queryIDColumn,StringBuffer bases,byte ref){
+	public void addColumn(ArrayList<Integer> queryIDColumn,StringBuffer bases,int ref){
 
 		if(!count.containsKey(queryIDColumn)){
-			ArrayList<Byte> p=new ArrayList<Byte>();
+			ArrayList<Integer> p=new ArrayList<Integer>();
 			p.add(ref);
 			count.put((queryIDColumn), p);
 			qb.queryIDs.add(queryIDColumn);
@@ -84,7 +84,6 @@ public class Clashes implements Serializable{
 		}else{
 
 			count.get(queryIDColumn).add(ref);
-			
 		}
 	}
 	
@@ -135,7 +134,7 @@ public class Clashes implements Serializable{
 
 						ArrayList<Integer> columns=qb.queryIDs.get(pos.get(j));
 						StringBuffer bases=qb.baseColumns.get(pos.get(j));
-						ArrayList<Byte> p=count.get((columns));
+						ArrayList<Integer> p=count.get((columns));
 						for(int k=0;k<p.size();k++){
 							if(p.get(k)==i){
 								basesCons.add(bases);
@@ -205,7 +204,7 @@ public class Clashes implements Serializable{
 		resolved=new HashMap<Integer, Boolean>();
 		for(int i=0;i<newClashes.size();i++){
 			ArrayList<Integer> col=newClashes.getQIDColumn(i);
-			ArrayList<Byte> p=newClashes.count.get((col));
+			ArrayList<Integer> p=newClashes.count.get((col));
 			StringBuffer baseColumn=newClashes.getBaseColumn(i);
 			for(int j=0;j<p.size();j++){
 				addColumn(col,baseColumn ,p.get(j));
@@ -311,7 +310,7 @@ public class Clashes implements Serializable{
 	private void createPosCol(int start){
 		for(int i=start;i<qb.queryIDs.size();i++){
 			ArrayList<Integer> col=qb.queryIDs.get(i);
-			ArrayList<Byte> refs=count.get(col);
+			ArrayList<Integer> refs=count.get(col);
 			for(int j=0;j<refs.size();j++){
 				int ref=refs.get(j);
 
@@ -347,13 +346,7 @@ public class Clashes implements Serializable{
 		
 	}
 	
-	private void print(){
-		Iterator<Entry<Integer,Integer>> it=consHM.entrySet().iterator();
-		while(it.hasNext()){
-			Entry<Integer,Integer> e=it.next();
-			System.out.println(e.getKey()+" "+e.getValue()+"\n");
-		}
-	}
+
 	
 	/**
 	 * Turns the clash into an alignment, AFTER resolving the clashes!!!

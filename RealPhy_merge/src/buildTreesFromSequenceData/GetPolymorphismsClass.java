@@ -382,7 +382,7 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 					queryIDColumn.add(queryID);
 				}
 				if(printInvariant||addition){
-					columns.addColumn(queryIDColumn, baseColumn,(byte)ref);
+					columns.addColumn(queryIDColumn, baseColumn,ref);
 				}
 			}
 		}
