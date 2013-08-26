@@ -57,10 +57,14 @@ public class Clashes implements Serializable{
 	HashMap<ArrayList<Integer>,ArrayList<Integer>> count=new HashMap<ArrayList<Integer>, ArrayList<Integer>>();
 	
 	//needed for alignment output!
-	ArrayList<String> idents=new ArrayList<String>();
+	ArrayList<String> idents;
 	
-	public Clashes(ArrayList<String> idents){
+	public Clashes setIdents(ArrayList<String> idents){
 		this.idents=idents;
+		return this;
+	}
+	public Clashes(){
+		
 	}
 	
 	public ArrayList<Integer> getQIDColumn(int pos){
@@ -98,6 +102,9 @@ public class Clashes implements Serializable{
 		createPosCol();
 		QueryBase resolved=new QueryBase();
 		while(unresolved.size()>0){
+			if(unresolved.size()%10000==0){
+				System.out.println("Sites still to resolve: "+ unresolved.size());
+			}
 			int rand=(int)(Math.random()*unresolved.size());
 			QueryBase result=resolveClash(unresolved.get(rand));
 			if(result!=null){
@@ -119,9 +126,10 @@ public class Clashes implements Serializable{
 //			System.out.println(col.get(i));
 //		}
 //	}
-	HashMap<Integer,Integer> consHM=new HashMap<Integer, Integer>();
 	//takes a random column out of the list of clashed columns as well as all other columns in which one of the involved column IDs is found
 	//it then calculates the consensus of all these columns and stores it in Column format
+	
+	
 	private QueryBase resolveClash(int rand){
 		ArrayList<Integer> qIDs=qb.queryIDs.get(rand);
 		ArrayList<StringBuffer> basesCons=new ArrayList<StringBuffer>();
@@ -187,6 +195,11 @@ public class Clashes implements Serializable{
 		}
 		return consense;
 	}
+	
+	
+	
+	
+	
 	
 //	private String toString(ArrayList<String> l){
 //		StringBuffer sb=new StringBuffer();
@@ -257,18 +270,31 @@ public class Clashes implements Serializable{
 	 * @return
 	 */
 	
+	private boolean isEqual(ArrayList<StringBuffer> bases){
+		String ref=bases.get(0).toString().toUpperCase();
+		for(int i=1;i<bases.size();i++){
+			String test=bases.get(i).toString().toUpperCase();
+			if(!ref.equals(test)){
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	private QueryBase getConsensus(ArrayList<StringBuffer> bases,ArrayList<ArrayList<Integer>> qIDs){
 		ArrayList<Integer> qIDsCons=new ArrayList<Integer>();
 		StringBuffer basesCons=new StringBuffer();
 		HashMap<Integer,Integer> colHash=new HashMap<Integer, Integer>();
-		ArrayList<String> baseCols=initbaseCols(bases);
-			for(int j=0;j<baseCols.get(0).length();j++){
+		if(!isEqual(bases)){
+			ArrayList<String> baseCols=initbaseCols(bases);
+			int length=baseCols.get(0).length();
+			for(int j=0;j<length;j++){
 				HashMap<Character,Integer> baseHash=new HashMap<Character, Integer>();
 				for(int i=0;i<qIDs.size();i++){
 					String baseCol=baseCols.get(i);
 					ArrayList<Integer> col=qIDs.get(i);
 					char c=baseCol.charAt(j);
-					
+
 					enterItem(baseHash,c);
 					if(j<col.size()){
 						Integer qID=col.get(j);
@@ -277,8 +303,11 @@ public class Clashes implements Serializable{
 				}
 				qIDsCons.add(getMax(colHash));
 				basesCons.append(getMax(baseHash));
+			}
+			return new QueryBase(qIDsCons,basesCons);
+		}else{
+			return new QueryBase(qIDs.get(0),bases.get(0));
 		}
-		return new QueryBase(qIDsCons,basesCons);
 	}
 	
 	private <T> void enterItem(HashMap<T,Integer> hm,T item){
@@ -309,6 +338,9 @@ public class Clashes implements Serializable{
 	 */
 	private void createPosCol(int start){
 		for(int i=start;i<qb.queryIDs.size();i++){
+			if(i%10000==0){
+				System.out.println("Created positional index for "+i+" out of "+qb.queryIDs.size());
+			}
 			ArrayList<Integer> col=qb.queryIDs.get(i);
 			ArrayList<Integer> refs=count.get(col);
 			for(int j=0;j<refs.size();j++){
@@ -359,13 +391,18 @@ public class Clashes implements Serializable{
 		alg.changeIdents(idents);
 		resolved.sort();
 
-		//resolved.addGaps();
+		resolved.addGaps();
 		for(int i=0;i<resolved.length();i++){
 			alg.addColumn(resolved.baseColumns.get(i).toString());
 		}
 		Fasta.write(alg.toFasta(),out);
 		
 		//print();
+	}
+	
+	public Clashes(ArrayList<File> clashFiles){
+
+		mergeFiles(clashFiles);
 	}
 	
 	/**
@@ -377,10 +414,51 @@ public class Clashes implements Serializable{
 		for(int i=0;i<size;i++){
 			System.out.println(Runtime.getRuntime().totalMemory());
 			System.out.println("Loading and merging "+clashObjectFiles.get(i).getName()+" "+i+" out of "+size+".");
+			System.out.println("Current clash size "+this.size());
+			
 			Clashes c=(Clashes)ObjectIO.readObject(clashObjectFiles.get(i));
+			System.out.println("Adding reference: "+c.count.get(c.getQIDColumn(0)).get(0));
+			//printColumn(c.getQIDColumn(0));
+			if(this.idents!=null){
+				if(isEqual(c.idents,this.idents)){
+
+
+				}else{
+					System.out.println("Idents are not equal!");
+					printIdents(c.idents);
+
+				}
+			}else{
+				this.idents=c.idents;
+			}
+			
 			this.addAll(c);
 			
 		}
 	}
-
+	
+	private void printColumn(ArrayList<Integer> id){
+		for(int i=0;i<id.size();i++){
+			System.out.println(id.get(i));
+		}
+	}
+	
+	private void printIdents(ArrayList<String> id){
+		for(int i=0;i<id.size();i++){
+			System.out.println(id.get(i));
+		}
+	}
+	
+	private boolean isEqual(ArrayList<String> id1,ArrayList<String> id2){
+		if(id1.size()==id2.size()){
+			for(int i=0;i<id1.size();i++){
+				if(!id1.get(i).equals(id2.get(i))){
+					return false;
+				}
+			}
+		}else{
+			return false;
+		}
+		return true;
+	}
 }

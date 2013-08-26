@@ -399,9 +399,8 @@ public class RealPhy {
 		//ArrayList<Columns> cc=readColumns(columnCollection);
 		File alignment=new File(mergeFolder+"/mergedAlignment.fas");
 		if(columnCollection.size()>0){
-			Clashes merge=(Clashes)ObjectIO.readObject(columnCollection.get(0));
-			columnCollection.remove(0);
-			merge.mergeFiles(columnCollection);
+			Clashes merge=new Clashes(columnCollection);
+			
 			merge.printAlignment(alignment);
 		}
 		System.out.println("Building merge tree...");

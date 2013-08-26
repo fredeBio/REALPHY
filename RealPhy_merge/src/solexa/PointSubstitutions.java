@@ -590,7 +590,7 @@ public abstract class PointSubstitutions {
 			 }
 			 if(subInfo){
 				 
-				 addBaseNames(fastaId, i, readID, subpos, orientation, lengthSeq);
+				 addBaseNames(fastaId, i, readID, subpos, orientation, length);
 
 			 }
 		 }
@@ -628,7 +628,7 @@ public abstract class PointSubstitutions {
 			}
 		}
 		if(subInfo&&!gap){
-			addBaseNames(fastaId, sub, readID, subpos, orientation,1);
+			addBaseNames(fastaId, sub, readID, subpos, orientation,qualityString.length());
 		}
 	 }
 		 

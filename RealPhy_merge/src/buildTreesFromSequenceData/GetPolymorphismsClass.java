@@ -337,7 +337,7 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 		ArrayList<String> sortedEx=toExtern(sorted);
 		int ref=getReferencePos(sortedEx,sorted);
 	//	int refSorted=getReferencePos(sortedEx);
-		Clashes columns=new Clashes(sortedEx);
+		Clashes columns=new Clashes().setIdents(sortedEx);
 		for(int i=0;i<genePoly.size();i++){
 			Genes gene=genePoly.get(i);
 			Iterator<Entry<Integer,Character>> it2= gene.polymorphisms.entrySet().iterator();

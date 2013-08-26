@@ -2,6 +2,7 @@ package buildTreesFromSequenceData;
 
 import java.io.File;
 
+import util.DNAmanipulations;
 import util.Fasta;
 import util.phylogenetics.Alignment;
 
@@ -14,8 +15,10 @@ public class CompareAlignments {
 				char onebase=one.getBase(j, i);
 				if(onebase!='-'){
 					char twobase=two.getBase(j, i);
-					if(onebase!=twobase){
+					char twobaseinv=DNAmanipulations.reverse(twobase+"").charAt(0);
+					if(onebase!=twobase&&onebase!=twobaseinv){
 						System.out.println("Problem with pos: "+i);
+						System.out.println(one.getColumn(i)+"\n"+two.getColumn(i));
 					}
 				}
 			}
