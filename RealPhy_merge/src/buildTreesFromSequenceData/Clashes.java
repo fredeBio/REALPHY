@@ -391,7 +391,7 @@ public class Clashes implements Serializable{
 		alg.changeIdents(idents);
 		resolved.sort();
 
-		resolved.addGaps();
+		//resolved.addGaps();
 		for(int i=0;i<resolved.length();i++){
 			alg.addColumn(resolved.baseColumns.get(i).toString());
 		}
