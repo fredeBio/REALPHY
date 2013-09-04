@@ -13,6 +13,9 @@ import util.*;
 
 
 public class RealPhy {
+	
+	String version="v1.05";
+	
 	public static  final String fasExt[]=new String[]{"fas","fa","fasta","fna"};
 	public static final String gbkExt[]=new String[]{"gbk","gb"};
 	File sequenceFolder=null;
@@ -51,44 +54,7 @@ public class RealPhy {
 			}
 			bt.analyseDeletedSites();
 		}else{
-			System.out.print("Usage:\n" +
-					"java -jar BuildTrees.jar [Sequence folder] [Output folder] [Options]\n" +
-					"Sequence folder needs to contain fasta files ending with .fas, genbank files ending in .gbk and short read files in fastq format ending in .fastq.\n" +
-					"The output folder needs to contain a file called \"config.txt\", which contains information about the location of the required executables such as bowtie2.\n\n"+
-					"Options:\n" +
-					"-readLength [integer] default=50 Possible values: Integer greater than 20; Size of fragments that are to be produced from the FASTA/GBK input sequences. With longer reader the mapping will take longer but it is also possible to map more divergent sequences.\n" +
-					//"-coreGenomes [integer] default=1 only relevant if noGenes true; Possible values: Integer greater than 1; Maximum is the number of available *.gbk (genbank files) in [Sequence folder]. Only genes that are found in all core genomes are going to be used for tree building.  The more genomes are used for core generation the faster the analysis will be.\n" +
-					//"-perBaseScore [double] default=1 only relevant if more than one core genome is selected. Possible values: Double value between 0 and 2; Only BLAST hits that have a per base score higher than the specified value are considered for the core genome.\n" +
-					"-quality [integer] default=20; Possible values: Integer value between 0 and 41 that corresponds to quality values in fastq files. Bases with values below thresold in fastq file will not be considered (fasta files will be converted into fastq files with a quality of 20).\n" +
-					"-polyThreshold [double] default=0.95; Possible values: Double value between 0 and 1.  Polymorphisms that occur at lower frequency than the specified threshold at any given position of the alignment will not be considered.\n"+
-					"-fractionCov [double] default=0; Possible values: Double between 0 and 1. Only genes of which more than fractionCov are covered by reads will be considered when determining the polymorphisms.\n" +
-					"-perBaseCov [integer] default=10; Possible values: Integer greater than or equal to 10.  Polymorphisms will only be extracted for regions that are covered by more than the set threshold of reads.\n" +
-					"-ref [sequence file name (without extension or path!)] default=random; Possible values: The file name of a sequence data set without the extension (.fas, .fastq or .gbk). Sets the reference sequence.\n" +
-					"-root [sequence file name (without extension or path!)] default=random; Possible values: The file name of a sequence data set without the extension (.fas, .fastq or .gbk).  Specifies the root of the tree.\n" +
-					//"-test [boolean] default=false; Possible values: true/false; column comparison tool for multiple different references.\n" +
-					"-refN [sequence file name (without extension or path!)] where N is the n-th reference genome; default=not set; Possible values: The file name of a sequence data set without the extension (.fas,.gbk,.fastq).\n" +
-					"-noGenes [boolean] default=true; If set to FALSE then genes (CDS) are extracted from a given .gbk file.\n" +
-					"-gapThreshold [double] default=0; specifies the proportion of input sequences that are allowed to contain gaps in the final sequence alignment (i.e. if set to 0.2 at most 20% of all nucleotides in each final alignment column are allowed to be gaps).\n" +
-					"-clean [boolean] default=false; If set to TRUE then the whole analysis will be rerun and existing data will be overwritten!\n" +
-					"-treeBuilder [integer] default=2;\n" +
-					"   0=Do not build a tree;\n" +
-					"   1=treepuzzle; \n" +
-					"   2=raxml\n" +
-					"   3=max. parsimony (dnapars)\n" +
-					"-verbose [boolean] default=true; If set to FALSE then it suppresses any program output except for errors or warnings.\n" +
-					"-invar [boolean] default=true; Possible values: \"true\" or \"false\". If true homologous positions that are conserved in all input sequences are put out. If set to false tree the reconstructed tree may be wrong.\n" +
-					//"-aligner [integer] default=1;\n" +
-					//"	0=SOAP2\n" +
-					//"	1=bowtie2\n" +
-					"-seedLength [integer] default=22 Possible values: Integer between 4 and 32; ONLY APPLICABLE FOR BOWTIE2; specifies k-mer length in bowtie2.\n" +
-					"-suffix [string] default=not set; appends a suffix to the reference output folder.\n" +
-					"-d [boolean] default=false; if this option is set to true then all alignment output files and sequence cut files will be deleted after the program is terminated.\n" +
-					"-merge [boolean] default=false; if this option is set to true and multiple references are selected, a final polymorphism file will be generated which combines all polymorphism files for all references. \n" +
-					"-gaps [boolean] false; if this option is set to true. The gapThreshold is automatically set to 100%, unless a different gapThreshold is specified.\n" +
-					"-config [string] this specifies the location of the config.txt. If not set it is assumed that the config.txt is in the working directory.\n" );
-					
-			//" -evaluateOverlaps default=false; Possible values: true/false; For test purposes. Tests whether polymorphisms that are only found for one of two compared reference genomes are really the result of one sequence containing more than two polymorphisms.\n" 
-					//"-cutGenes default=false; boolean true/false");
+			printHelp();
 		}
 		//Cut sequences
 		long l2=System.currentTimeMillis();
@@ -107,6 +73,78 @@ public class RealPhy {
 		}
 	}
 	
+	public static void printHelp(){
+		System.out.print("Usage:\n" +
+				"java -jar BuildTrees.jar [Sequence folder] [Output folder] [Options]\n" +
+				"Sequence folder needs to contain fasta files ending with .fas, genbank files ending in .gbk and short read files in fastq format ending in .fastq.\n" +
+				"The output folder needs to contain a file called \"config.txt\", which contains information about the location of the required executables such as bowtie2.\n\n"+
+				"Options:\n" +
+				"-readLength [integer] default=50 Possible values: Integer greater than 20; Size of fragments that are to be produced from the FASTA/GBK input sequences. With longer reader the mapping will take longer but it is also possible to map more divergent sequences.\n" +
+				"-quality [integer] default=20; Possible values: Integer value between 0 and 41 that corresponds to quality values in fastq files. Bases with values below thresold in fastq file will not be considered (fasta files will be converted into fastq files with a quality of 20).\n" +
+				"-polyThreshold [double] default=0.95; Possible values: Double value between 0 and 1.  Polymorphisms that occur at lower frequency than the specified threshold at any given position of the alignment will not be considered.\n"+
+				"-fractionCov [double] default=0; Possible values: Double between 0 and 1. Only genes of which more than fractionCov are covered by reads will be considered when determining the polymorphisms.\n" +
+				"-perBaseCov [integer] default=10; Possible values: Integer greater than or equal to 10.  Polymorphisms will only be extracted for regions that are covered by more than the set threshold of reads.\n" +
+				"-ref [sequence file name (without extension or path!)] default=random; Possible values: The file name of a sequence data set without the extension (.fas, .fastq or .gbk). Sets the reference sequence.\n" +
+				"-root [sequence file name (without extension or path!)] default=random; Possible values: The file name of a sequence data set without the extension (.fas, .fastq or .gbk).  Specifies the root of the tree.\n" +
+				//"-test [boolean] default=false; Possible values: true/false; column comparison tool for multiple different references.\n" +
+				"-refN [sequence file name (without extension or path!)] where N is the n-th reference genome; default=not set; Possible values: The file name of a sequence data set without the extension (.fas,.gbk,.fastq).\n" +
+				"-genes If set  then genes (CDS) are extracted from a given .gbk file.\n" +
+				"-gapThreshold [double] default=0; specifies the proportion of input sequences that are allowed to contain gaps in the final sequence alignment (i.e. if set to 0.2 at most 20% of all nucleotides in each final alignment column are allowed to be gaps).\n" +
+				"-clean/-c If set then the whole analysis will be rerun and existing data will be overwritten!\n" +
+				"-treeBuilder [integer] default=2;\n" +
+				"   0=Do not build a tree;\n" +
+				"   1=treepuzzle; \n" +
+				"   2=raxml\n" +
+				"   3=max. parsimony (dnapars)\n" +
+				"-quiet/-q If set then it suppresses any program output except for errors or warnings.\n" +
+				"-varOnly/-v If set then homologous positions that are conserved in all input sequences are put out. If set then the reconstructed tree may be wrong.\n" +
+				//"-aligner [integer] default=1;\n" +
+				//"	0=SOAP2\n" +
+				//"	1=bowtie2\n" +
+				"-seedLength [integer] default=22 Possible values: Integer between 4 and 32; ONLY APPLICABLE FOR BOWTIE2; specifies k-mer length in bowtie2.\n" +
+				"-suffix [string] default=not set; appends a suffix to the reference output folder.\n" +
+				"-d/-delete If this option is set then all alignment output files and sequence cut files will be deleted after the program is terminated.\n" +
+				"-merge/-m If this option is set multiple references are selected, a final polymorphism file will be generated which combines all polymorphism files for all references. \n" +
+				"-gaps/-g If this option is set. The gapThreshold is automatically set to 100%, unless a different gapThreshold is specified.\n" +
+				"-config [string] this specifies the location of the config.txt. If not set it is assumed that the config.txt is in the working directory.\n" +
+				"-h/-help Shows this help.\n" +
+				"-version Prints the program's version." );
+				
+		//" -evaluateOverlaps default=false; Possible values: true/false; For test purposes. Tests whether polymorphisms that are only found for one of two compared reference genomes are really the result of one sequence containing more than two polymorphisms.\n" 
+				//"-cutGenes default=false; boolean true/false");
+	}
+	private static final Map<String, Boolean> novalueArgs;
+    static
+    {
+        novalueArgs = new HashMap<String, Boolean>();
+        novalueArgs.put("h", true);
+        novalueArgs.put("help", true);
+        
+        novalueArgs.put("gaps", true);
+        novalueArgs.put("g", true);
+
+        novalueArgs.put("merge", true);
+        novalueArgs.put("m", true);
+
+        novalueArgs.put("d", true);
+        novalueArgs.put("delete", true);
+
+        novalueArgs.put("varOnly", true);
+        novalueArgs.put("v", true);
+
+        novalueArgs.put("quiet", true);
+        novalueArgs.put("q", true);
+
+        novalueArgs.put("clean", true);
+        novalueArgs.put("c", true);
+
+        novalueArgs.put("genes", true);
+
+        novalueArgs.put("version", true);
+
+
+    }
+    
 	private String getRscript(){
 		String RscriptExecutable=path.get("Rscript");
 		if(RscriptExecutable==null){
@@ -120,16 +158,16 @@ public class RealPhy {
 	public RealPhy(String[] args){
 		initDefault();
 		setVariables(args);
-		checkVerbose();
+		checkQuiet();
 		checkSequenceFiles();
 		aligner=(Integer)arguments.get("aligner");
 		seedLength=(Integer)arguments.get("seedLength");
-		flank=(Boolean)arguments.get("noGenes")==true?0:(Integer)arguments.get("readLength");
+		flank=(Boolean)arguments.get("genes")==false?0:(Integer)arguments.get("readLength");
 		clean=(Boolean)arguments.get("clean");
 	}
 	
-	private void checkVerbose(){
-		if(!(Boolean)arguments.get("verbose")){
+	private void checkQuiet(){
+		if(!(Boolean)arguments.get("quiet")){
 			System.setOut(new PrintStream(new OutputStream(){
 				public void write(int b) {
 				}
@@ -167,8 +205,8 @@ public class RealPhy {
 	public void runAnalyses(){
 		refs=!references?getReference():getReferences();
 		if(refs.size()==0){
-			if(!(Boolean)arguments.get("noGenes")){
-				System.err.println("ERROR: At least one .gbk file is required in the sequence folder: "+sequenceFolder+" (Option -noGenes is set to false.)");
+			if((Boolean)arguments.get("genes")){
+				System.err.println("ERROR: At least one .gbk file is required in the sequence folder: "+sequenceFolder+" (Option -genes is set.)");
 				System.exit(-1);
 			}else{
 				System.err.println("ERROR: At least one genbank or fasta file is required in the sequence folder: "+sequenceFolder);
@@ -180,9 +218,9 @@ public class RealPhy {
 			outFolder=new File(masterOutFolder+"/"+refs.get(i)+arguments.get("suffix"));
 			clean();
 			if(!outFolder.exists())outFolder.mkdir();
-			String genes=(Boolean)arguments.get("noGenes")==true?"_NoGenes":"";
-			String invar=(Boolean)arguments.get("invar")==true?"":"_noInvar";
-			String base=outFolder+"/PolySeqOut"+genes+invar+"/";
+			String genes=(Boolean)arguments.get("genes")==false?"_NoGenes":"";
+			String varOnly=(Boolean)arguments.get("varOnly")==false?"":"_noInvar";
+			String base=outFolder+"/PolySeqOut"+genes+varOnly+"/";
 
 			polymorphismsOutFolder=new File(base);
 			System.out.println(base);
@@ -191,11 +229,11 @@ public class RealPhy {
 			}
 
 			
-			alignmentFolder=(Boolean)arguments.get("noGenes")?new File(outFolder+"/alignOut_NoGenes/"):new File(outFolder+"/alignOut/");
+			alignmentFolder=!(Boolean)arguments.get("genes")?new File(outFolder+"/alignOut_NoGenes/"):new File(outFolder+"/alignOut/");
 
 			
 			System.out.println("Preparing reference...");
-			File core=(Boolean)arguments.get("noGenes")==true?moveRefToCore(refs.get(i)):determineCore(refs.get(i));
+			File core=!(Boolean)arguments.get("genes")==true?moveRefToCore(refs.get(i)):determineCore(refs.get(i));
 			ArrayList<File> missingAlignmentFiles=getMissingAlignments();
 			if(missingAlignmentFiles.size()>0){
 				System.out.println("Cut fasta sequence files into fragments...");
@@ -310,7 +348,7 @@ public class RealPhy {
 				String id=name.split("\\.")[0];
 				refIDs.add(id);
 				return refIDs;
-			}else if(hasExtension(name,fasExt)&&(Boolean)arguments.get("noGenes")){
+			}else if(hasExtension(name,fasExt)&&!(Boolean)arguments.get("genes")){
 				String id=name.split("\\.")[0];
 				refIDs.add(id);
 				return refIDs;
@@ -358,9 +396,9 @@ public class RealPhy {
 			outFolder=new File(masterOutFolder+"/"+refs.get(i)+arguments.get("suffix"));
 			clean();
 			if(!outFolder.exists())outFolder.mkdir();
-			String genes=(Boolean)arguments.get("noGenes")==true?"_NoGenes":"";
-			String invar=(Boolean)arguments.get("invar")==true?"":"_noInvar";
-			String base=outFolder+"/PolySeqOut"+genes+invar+"/";
+			String genes=(Boolean)arguments.get("genes")==false?"_NoGenes":"";
+			String varOnly=(Boolean)arguments.get("varOnly")==false?"":"_noInvar";
+			String base=outFolder+"/PolySeqOut"+genes+varOnly+"/";
 
 			polymorphismsOutFolder=new File(base);
 			if(!polymorphismsOutFolder.exists()){
@@ -368,8 +406,8 @@ public class RealPhy {
 			}
 
 			//File cutFolder=new File(sequenceFolder+"/cut/");
-			alignmentFolder=(Boolean)arguments.get("noGenes")?new File(outFolder+"/alignOut_NoGenes/"):new File(outFolder+"/alignOut/");
-			File core=(Boolean)arguments.get("noGenes")==true?moveRefToCore(refs.get(i)):determineCore(refs.get(i));
+			alignmentFolder=!(Boolean)arguments.get("genes")?new File(outFolder+"/alignOut_NoGenes/"):new File(outFolder+"/alignOut/");
+			File core=!(Boolean)arguments.get("genes")==true?moveRefToCore(refs.get(i)):determineCore(refs.get(i));
 			ArrayList<File> missingAlignmentFiles=getMissingAlignments();
 			if(missingAlignmentFiles.size()>0){
 				System.out.println("Cut fasta sequence files into fragments...");
@@ -556,7 +594,7 @@ public class RealPhy {
 	public GetPolymorphisms getColumns(ArrayList<File> alignmentFiles,File core,String ref){
 		//determine polymorphisms
 		System.out.println("Determine polymorphisms...");
-		GetPolymorphisms GPS=new GetPolymorphismWithGaps(alignmentFiles,refs, core, flank, (Integer)arguments.get("quality"), (Double)arguments.get("polyThreshold"), (Double)arguments.get("fractionCov"), perBaseCov,(Boolean)arguments.get("merge"),(Boolean)arguments.get("noGenes"),gapThreshold,(Boolean)arguments.get("invar"),polymorphismsOutFolder,ref);
+		GetPolymorphisms GPS=new GetPolymorphismWithGaps(alignmentFiles,refs, core, flank, (Integer)arguments.get("quality"), (Double)arguments.get("polyThreshold"), (Double)arguments.get("fractionCov"), perBaseCov,(Boolean)arguments.get("merge"),!(Boolean)arguments.get("genes"),gapThreshold,!(Boolean)arguments.get("varOnly"),polymorphismsOutFolder,ref);
 
 		File polymorphismsFas=GPS.writeSequences(); 
 		System.out.println("Building tree...");
@@ -567,7 +605,7 @@ public class RealPhy {
 	public File getPolymorphisms(ArrayList<File> alignmentFiles,File core,String ref){
 		//determine polymorphisms
 
-		GetPolymorphisms GPS=new GetPolymorphismWithGaps(alignmentFiles, refs,core, flank, (Integer)arguments.get("quality"), (Double)arguments.get("polyThreshold"), (Double)arguments.get("fractionCov"), perBaseCov,(Boolean)arguments.get("merge"),(Boolean)arguments.get("noGenes"),gapThreshold,(Boolean)arguments.get("invar"),polymorphismsOutFolder,ref);
+		GetPolymorphisms GPS=new GetPolymorphismWithGaps(alignmentFiles, refs,core, flank, (Integer)arguments.get("quality"), (Double)arguments.get("polyThreshold"), (Double)arguments.get("fractionCov"), perBaseCov,(Boolean)arguments.get("merge"),!(Boolean)arguments.get("genes"),gapThreshold,!(Boolean)arguments.get("varOnly"),polymorphismsOutFolder,ref);
 
 		File polymorphismsFas=GPS.writeSequences();
 		return polymorphismsFas;
@@ -595,7 +633,7 @@ public class RealPhy {
 			else if(treeBuilder==2){
 				Fasta.writePhylip(fas, phylip, 100);
 				int rand=(int)(Math.random()*1000000);
-				RunTreePrograms.runRAxML(phylip.getAbsoluteFile(), new File(path.get("RAXML")),seqLength,"raxml",(String)arguments.get("root"),(Boolean)arguments.get("noGenes"),rand);
+				RunTreePrograms.runRAxML(phylip.getAbsoluteFile(), new File(path.get("RAXML")),seqLength,"raxml",(String)arguments.get("root"),!(Boolean)arguments.get("genes"),rand);
 				tree=new File(phylip.getParent()+"/RAxML_bestTree.raxml");
 			}else if(treeBuilder==3){
 				Fasta.writePhylip(fas, phylip, 10);
@@ -678,12 +716,12 @@ public class RealPhy {
 		arguments.put("root","");
 		arguments.put("evaluateOverlaps",new Boolean(false));
 		arguments.put("merge",new Boolean(false));
-		arguments.put("noGenes", new Boolean(true));
+		arguments.put("genes", new Boolean(false));
 		arguments.put("gapThreshold", new Double(0));
 		arguments.put("treeBuilder", new Integer(2));
 		arguments.put("clean", new Boolean(false));
-		arguments.put("verbose", new Boolean(true));
-		arguments.put("invar", new Boolean(true));
+		arguments.put("quiet", new Boolean(false));
+		arguments.put("varOnly", new Boolean(false));
 		//arguments.put("covWindow", 0);
 		arguments.put("aligner", bowtie2);
 		arguments.put("seedLength", 22);
@@ -693,26 +731,43 @@ public class RealPhy {
 
 	}
 	
+
+	
 	private void setVariables(String[] args){
 		sequenceFolder=new File(args[0]);
 		outFolder=new File(args[1]);
 		cutFolder=new File(sequenceFolder+"/cut/");
-		for(int i=2;i<args.length-1;i+=2){
-			if(i%2==0){
-				if(!args[i].startsWith("-")){
-					System.err.println("Arguments have to start with \"-\". Violating argument: "+args[i]+".");
-					System.exit(-1);
+		int i=2;
+		while(i<args.length){
+			int add=0;	
+			if(!args[i].startsWith("-")){
+				System.err.println("Arguments have to start with \"-\". Violating argument: "+args[i]+".");
+				System.exit(-1);
+			}else{
+				String arg=args[i].substring(1);
+				if(novalueArgs.containsKey(arg)){
+					add=1;
+					Object o=new Object();
+					if((o=checkValue(arg,""))!=null){
+						arguments.put(arg, o);
+
+					}else{
+						System.err.println("Invalid value \""+args[i+1]+"\" for argument -"+arg+".");
+						System.exit(-1);
+					}
 				}else{
-					String arg=args[i].substring(1);
+					add=2;
 					Object o=new Object();
 					if((o=checkValue(arg,args[i+1]))!=null){
 						arguments.put(arg, o);
+
 					}else{
 						System.err.println("Invalid value \""+args[i+1]+"\" for argument -"+arg+".");
 						System.exit(-1);
 					}
 				}
 			}
+			i+=add;
 		}
 		checkReference();
 		config=config==null?new File(outFolder+"/config.txt"):config;
@@ -722,6 +777,7 @@ public class RealPhy {
 			System.err.println("Cannot find "+config+"!");
 			System.exit(-1);
 		}
+
 	}
 	
 	private void checkReference(){
@@ -733,15 +789,15 @@ public class RealPhy {
 				if(seqFile!=null){
 					boolean fas=hasExtension(seqFile.getName(), fasExt);
 					boolean gbk=hasExtension(seqFile.getName(), gbkExt);
-					if(!gbk&&!(Boolean)arguments.get("noGenes")){
+					if(!gbk&&(Boolean)arguments.get("genes")){
 						System.err.print("File called ");
 						for(int j=0;j<gbkExt.length-1;j++){
 							System.err.println(ref+"."+gbkExt[j]+" or ");
 						}
-						System.err.println(ref+"."+gbkExt[gbkExt.length-1]+" is required as reference with CDS information if noGenes is set to false (default).");
+						System.err.println(ref+"."+gbkExt[gbkExt.length-1]+" is required as reference with CDS information if genes is set.");
 						System.exit(-1);
 					}else
-						if(!fas&&!gbk && (Boolean)arguments.get("noGenes")){
+						if(!fas&&!gbk && !(Boolean)arguments.get("genes")){
 							System.err.print("File called ");
 							for(int j=0;j<fasExt.length-1;j++){
 								System.err.print(ref+"."+fasExt[j]+" or ");
@@ -802,12 +858,13 @@ public class RealPhy {
 		}else if(arg.equals("gapThreshold")){
 			gapThreshold=checkDouble(arg,value,0,1.0);
 			return gapThreshold;
-		}else if(arg.equals("gaps")){
-			gaps=(Boolean)checkBoolean(value);
+		}else if(arg.equals("gaps")||arg.equals("g")){
+			gaps=true;
 			if(gaps&&gapThreshold==0){
-				gapThreshold=1.0;
+				gapThreshold=1.1;
 			}
-			return gaps;
+			
+			return true;
 
 		}else if(arg.equals("perBaseCov")){
 			Integer i;
@@ -843,31 +900,46 @@ public class RealPhy {
 		}else if(arg.startsWith("config")){
 			return checkConfig(value);
 
-		}else if(arg.equals("evaluateOverlaps")){
-			return checkBoolean(value);
+		}else if(arg.equals("merge")||arg.equals("m")){
+			arguments.put("merge", true);
 
-		}else if(arg.equals("merge")){
-			return checkBoolean(value);
+			return true;
 
-		}else if(arg.equals("noGenes")){
-			return checkBoolean(value);
+		}else if(arg.equals("genes")){
+			arguments.put("genes", true);
 
-		}else if(arg.startsWith("clean")){
-			return checkBoolean(value);
+			return true;
 
-		}else if(arg.equals("verbose")){
-			return checkBoolean(value);
+		}else if(arg.startsWith("clean")||arg.equals("c")){
+			arguments.put("clean", true);
 
-		}else if(arg.equals("invar")){
-			return checkBoolean(value);
+			return true;
+
+		}else if(arg.equals("quiet")||arg.equals("q")){
+			arguments.put("quiet", true);
+
+			return true;
+
+		}else if(arg.equals("varOnly")||arg.equals("v")){
+			arguments.put("varOnly", true);
+
+			return true;
 
 		}else if(arg.equals("suffix")){
 			return checkSuffix(value);
 
-		}else if(arg.equals("d")){
-			delete=checkBoolean(value);
-			return delete;
+		}else if(arg.equals("d")||arg.equals("delete")){
+			arguments.put("d", true);
+			return true;
 
+		}else if(arg.equals("version")){
+			System.out.println("This is REALPHY version "+version+".");
+			System.exit(0);
+			return null;
+		}else if(arg.equals("h")||arg.equals("help")){
+			printHelp();
+			System.exit(0);
+			return null;
 		}else{
 			System.err.println("Do not recognize "+arg+".");
 			return null;
