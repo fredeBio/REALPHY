@@ -14,7 +14,7 @@ import util.*;
 
 public class RealPhy {
 	
-	String version="v1.05";
+	static String version="v1.05";
 	
 	public static  final String fasExt[]=new String[]{"fas","fa","fasta","fna"};
 	public static final String gbkExt[]=new String[]{"gbk","gb"};
@@ -54,7 +54,11 @@ public class RealPhy {
 			}
 			bt.analyseDeletedSites();
 		}else{
+			if(args.length>0&&args[0].equals("-version")){
+				printVersion();
+			}else{
 			printHelp();
+			}
 		}
 		//Cut sequences
 		long l2=System.currentTimeMillis();
@@ -72,7 +76,10 @@ public class RealPhy {
 			ads.writeDeletedAbovePolT(deletedSitesAbovePol);
 		}
 	}
-	
+	public static void printVersion(){
+		System.out.println("This is REALPHY version "+version+".");
+		System.exit(0);
+	}
 	public static void printHelp(){
 		System.out.print("Usage:\n" +
 				"java -jar BuildTrees.jar [Sequence folder] [Output folder] [Options]\n" +
@@ -167,7 +174,7 @@ public class RealPhy {
 	}
 	
 	private void checkQuiet(){
-		if(!(Boolean)arguments.get("quiet")){
+		if((Boolean)arguments.get("quiet")){
 			System.setOut(new PrintStream(new OutputStream(){
 				public void write(int b) {
 				}
@@ -933,8 +940,7 @@ public class RealPhy {
 			return true;
 
 		}else if(arg.equals("version")){
-			System.out.println("This is REALPHY version "+version+".");
-			System.exit(0);
+			printVersion();
 			return null;
 		}else if(arg.equals("h")||arg.equals("help")){
 			printHelp();
