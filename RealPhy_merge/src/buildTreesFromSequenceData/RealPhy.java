@@ -110,7 +110,7 @@ public class RealPhy {
 				//"	1=bowtie2\n" +
 				"-seedLength [integer] default=22 Possible values: Integer between 4 and 32; ONLY APPLICABLE FOR BOWTIE2; specifies k-mer length in bowtie2.\n" +
 				"-suffix [string] default=not set; appends a suffix to the reference output folder.\n" +
-				"-d/-delete If this option is set then all alignment output files and sequence cut files will be deleted after the program is terminated.\n" +
+				"-d/ elete If this option is set then all alignment output files and sequence cut files will be deleted after the program is terminated.\n" +
 				"-merge/-m If this option is set multiple references are selected, a final polymorphism file will be generated which combines all polymorphism files for all references. \n" +
 				"-gaps/-g If this option is set. The gapThreshold is automatically set to 100%, unless a different gapThreshold is specified.\n" +
 				"-config [string] this specifies the location of the config.txt. If not set it is assumed that the config.txt is in the working directory.\n" +
