@@ -14,7 +14,7 @@ import util.*;
 
 public class RealPhy {
 	
-	static String version="v1.05";
+	static String version="v1.06";
 	
 	public static  final String fasExt[]=new String[]{"fas","fa","fasta","fna"};
 	public static final String gbkExt[]=new String[]{"gbk","gb"};
@@ -91,10 +91,10 @@ public class RealPhy {
 				"-polyThreshold [double] default=0.95; Possible values: Double value between 0 and 1.  Polymorphisms that occur at lower frequency than the specified threshold at any given position of the alignment will not be considered.\n"+
 				"-fractionCov [double] default=0; Possible values: Double between 0 and 1. Only genes of which more than fractionCov are covered by reads will be considered when determining the polymorphisms.\n" +
 				"-perBaseCov [integer] default=10; Possible values: Integer greater than or equal to 10.  Polymorphisms will only be extracted for regions that are covered by more than the set threshold of reads.\n" +
-				"-ref [sequence file name (without extension or path!)] default=random; Possible values: The file name of a sequence data set without the extension (.fas, .fastq or .gbk). Sets the reference sequence.\n" +
-				"-root [sequence file name (without extension or path!)] default=random; Possible values: The file name of a sequence data set without the extension (.fas, .fastq or .gbk).  Specifies the root of the tree.\n" +
+				"-ref [sequence file name (without extension or path!)] default=random; Possible values: The file name of a sequence data set without the extension (.fas, .fasta, .fa, .fna, .fastq, .fastq.gz, .gb or .gbk). Sets the reference sequence.\n" +
+				"-root [sequence file name (without extension or path!)] default=random; Possible values: The file name of a sequence data set without the extension (.fas, .fasta, .fa, .fna, .fastq, .fastq.gz, .gb or .gbk).  Specifies the root of the tree.\n" +
 				//"-test [boolean] default=false; Possible values: true/false; column comparison tool for multiple different references.\n" +
-				"-refN [sequence file name (without extension or path!)] where N is the n-th reference genome; default=not set; Possible values: The file name of a sequence data set without the extension (.fas,.gbk,.fastq).\n" +
+				"-refN [sequence file name (without extension or path!)] where N is the n-th reference genome; default=not set; Possible values: The file name of a sequence data set without the extension (.fas, .fasta, .fa, .fna, .fastq, .fastq.gz, .gb or .gbk).\n" +
 				"-genes If set  then genes (CDS) are extracted from a given .gbk file.\n" +
 				"-gapThreshold [double] default=0; specifies the proportion of input sequences that are allowed to contain gaps in the final sequence alignment (i.e. if set to 0.2 at most 20% of all nucleotides in each final alignment column are allowed to be gaps).\n" +
 				"-clean/-c If set then the whole analysis will be rerun and existing data will be overwritten!\n" +
@@ -188,14 +188,15 @@ public class RealPhy {
 		//HashMap< String,Boolean> hm10=new HashMap<String, Boolean>();
 		for(int i=0;i<list.length;i++){
 			File file=list[i];
-			if(file.getName().endsWith("fastq")||file.getName().endsWith("fas")||file.getName().endsWith("gbk")){
-				String name=file.getName().split("\\.")[0];
+			String name=file.getName();
+			if(name.endsWith("fastq.gz")||file.getName().endsWith("fastq")||hasExtension(name, fasExt)||hasExtension(name, gbkExt)){
+				String id=file.getName().split("\\.")[0];
 				//String name10=name.length()>10?name.substring(0,10):name;
-				if(!hm.containsKey(name)){//&&!hm10.containsKey(name10)){
+				if(!hm.containsKey(id)){//&&!hm10.containsKey(name10)){
 				//hm10.put(name,true);
-					hm.put(name, true);
+					hm.put(id, true);
 				}
-				else System.err.println("WARNING: "+file+" has the same name or the same name as another file in the sequence folder.\n If the two file names only differ in the extension (fas, fastq or gbk) only one of the files will be used for further analyses.");
+				else System.err.println("WARNING: "+file+" has the same name or the same name as another file in the sequence folder.\n If the two file names only differ in the extension (.fas, .fasta, .fa, .fna, .fastq, .fastq.gz, .gb or .gbk) only one of the files will be used for further analyses.");
 			}
 		}
 	}
@@ -269,7 +270,7 @@ public class RealPhy {
 			File alFile=null;
 			if(hasExtension(name, fasExt)||hasExtension(name, gbkExt)){
 				alFile=new File(alignmentFolder+"/"+name.split("\\.")[0]+"_"+arguments.get("readLength")+"fasta"+suffix);
-			}else if(files[i].getName().endsWith("fastq")){
+			}else if(files[i].getName().endsWith("fastq")||files[i].getName().endsWith("fastq.gz")){
 				alFile=new File(alignmentFolder+"/"+name.split("\\.")[0]+suffix);
 			}
 			if(alFile!=null&&!alFile.exists()){
@@ -288,7 +289,7 @@ public class RealPhy {
 			File alFile=null;
 			if(hasExtension(name,fasExt)||hasExtension(name,gbkExt)){
 				alFile=new File(alignmentFolder+"/"+name.split("\\.")[0]+"_"+arguments.get("readLength")+"fasta"+suffix);
-			}else if(files[i].getName().endsWith("fastq")){
+			}else if(files[i].getName().endsWith("fastq")||files[i].getName().endsWith("fastq.gz")){
 				alFile=new File(alignmentFolder+"/"+name.split("\\.")[0]+suffix);
 			}
 			if(alFile!=null&&alFile.exists()){

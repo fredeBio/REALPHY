@@ -37,7 +37,9 @@ public class CutUpSequences {
 					hm.put(temp.getName(),true);
 					cutSeqs.add(temp);
 				}
+			}else if(files[i].getName().endsWith("fastq.gz")){
 				cutSeqs.add(files[i]);
+
 			}
 		}
 		return cutSeqs;
