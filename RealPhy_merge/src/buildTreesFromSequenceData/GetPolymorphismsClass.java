@@ -156,7 +156,7 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 
 	public String getStrain(String name){
 		String split[]=name.split("_");
-		if(split[split.length-1].endsWith("fasta")){
+		if(split[split.length-1].endsWith("fasta")||split[split.length-1].endsWith("fastq")){
 			StringBuffer newName=new StringBuffer();
 			newName.append(split[0]);
 			for(int i=1;i<split.length-1;i++){

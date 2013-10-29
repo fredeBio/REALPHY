@@ -117,7 +117,7 @@ public class CutUpSequences {
 			if(!cutFolder.exists()){
 				cutFolder.mkdir();
 			}
-			File out=new File(cutFolder+"/"+id+"_"+length+".fastq");
+			File out=new File(cutFolder+"/"+id+"_"+length+"fastq.fastq");
 			if(out.exists()&&!clean){
 				System.out.println(out+" already exists. Continue with next file.");
 				return out;

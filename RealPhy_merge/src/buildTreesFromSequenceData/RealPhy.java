@@ -268,9 +268,11 @@ public class RealPhy {
 			String name=files[i].getName();
 			String suffix=aligner==soap2?".sop":PerformBowtie.samtoolsExist()?".bam":".sam";
 			File alFile=null;
-			if(hasExtension(name, fasExt)||hasExtension(name, gbkExt)){
+			if(hasExtension(name,fasExt)||hasExtension(name,gbkExt)){
 				alFile=new File(alignmentFolder+"/"+name.split("\\.")[0]+"_"+arguments.get("readLength")+"fasta"+suffix);
-			}else if(files[i].getName().endsWith("fastq")||files[i].getName().endsWith("fastq.gz")){
+			}else if(files[i].getName().endsWith("fastq")){
+				alFile=new File(alignmentFolder+"/"+name.split("\\.")[0]+"_"+arguments.get("readLength")+"fastq"+suffix);
+			}else if(files[i].getName().endsWith("fastq.gz")){
 				alFile=new File(alignmentFolder+"/"+name.split("\\.")[0]+suffix);
 			}
 			if(alFile!=null&&!alFile.exists()){
@@ -289,7 +291,9 @@ public class RealPhy {
 			File alFile=null;
 			if(hasExtension(name,fasExt)||hasExtension(name,gbkExt)){
 				alFile=new File(alignmentFolder+"/"+name.split("\\.")[0]+"_"+arguments.get("readLength")+"fasta"+suffix);
-			}else if(files[i].getName().endsWith("fastq")||files[i].getName().endsWith("fastq.gz")){
+			}else if(files[i].getName().endsWith("fastq")){
+				alFile=new File(alignmentFolder+"/"+name.split("\\.")[0]+"_"+arguments.get("readLength")+"fastq"+suffix);
+			}else if(files[i].getName().endsWith("fastq.gz")){
 				alFile=new File(alignmentFolder+"/"+name.split("\\.")[0]+suffix);
 			}
 			if(alFile!=null&&alFile.exists()){
