@@ -144,8 +144,8 @@ import util.*;
 							if(polies.containsKey(pos)){
 								int GenomePos=genePoly.get(i).orient=='+'?pos+genePoly.get(i).pos-1:(genePoly.get(i).length-pos)+genePoly.get(i).pos;
 								bwDet.write(strainIDExtern+"\t"+contig+"\t"+genePoly.get(i).geneID+"\t"+genePoly.get(i).pos+"\t"+pos+"\t"+GenomePos+"\t"+origBase+"\t"+polies.get(pos).base+"\t"+posInAlignment);
-								if(genes){
-									int frame=(pos-1)%3;
+								int frame=(pos-1)%3;
+								if(genes &&genePoly.get(i).length>pos-frame+2){
 									String origCodon=""+genePoly.get(i).polymorphisms.get(pos-frame)+""+genePoly.get(i).polymorphisms.get(pos-frame+1)+""+genePoly.get(i).polymorphisms.get(pos-frame+2);
 									origCodon+="="+DNAmanipulations.translate(origCodon, DNAmanipulations.code());
 									char one=polies.containsKey(pos-frame)?polies.get(pos-frame).base:genePoly.get(i).polymorphisms.get(pos-frame);

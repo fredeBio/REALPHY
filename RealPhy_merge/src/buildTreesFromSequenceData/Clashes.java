@@ -134,7 +134,11 @@ public class Clashes implements Serializable{
 		ArrayList<Integer> qIDs=qb.queryIDs.get(rand);
 		ArrayList<StringBuffer> basesCons=new ArrayList<StringBuffer>();
 		ArrayList<ArrayList<Integer>> qIDCons=new ArrayList<ArrayList<Integer>>();
-		for(int i=0;i<qIDs.size();i++){		
+		Iterator<Entry<Integer,HashMap<Integer, ArrayList<Integer>>>> it=posCol.entrySet().iterator();
+		while (it.hasNext()){
+			Entry<Integer,HashMap<Integer, ArrayList<Integer>>> e=it.next();
+			int i=e.getKey();
+			
 			if(posCol.get(i).containsKey(qIDs.get(i))){
 				ArrayList<Integer> pos=posCol.get(i).get(qIDs.get(i));
 				for(int j=0;j<pos.size();j++){
