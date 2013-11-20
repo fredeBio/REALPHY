@@ -40,6 +40,7 @@ public class RealPhy {
 	File cutFolder;
 	Boolean gaps=false;
 	Double gapThreshold=0.0;
+	File raxmlOptions=null;
 	ArrayList<String> refs;
 	public static void main(String args[]){
 		long l=System.currentTimeMillis();
@@ -89,7 +90,6 @@ public class RealPhy {
 				"-readLength [integer] default=50 Possible values: Integer greater than 20; Size of fragments that are to be produced from the FASTA/GBK input sequences. With longer reader the mapping will take longer but it is also possible to map more divergent sequences.\n" +
 				"-quality [integer] default=20; Possible values: Integer value between 0 and 41 that corresponds to quality values in fastq files. Bases with values below thresold in fastq file will not be considered (fasta files will be converted into fastq files with a quality of 20).\n" +
 				"-polyThreshold [double] default=0.95; Possible values: Double value between 0 and 1.  Polymorphisms that occur at lower frequency than the specified threshold at any given position of the alignment will not be considered.\n"+
-				"-fractionCov [double] default=0; Possible values: Double between 0 and 1. Only genes of which more than fractionCov are covered by reads will be considered when determining the polymorphisms.\n" +
 				"-perBaseCov [integer] default=10; Possible values: Integer greater than or equal to 10.  Polymorphisms will only be extracted for regions that are covered by more than the set threshold of reads.\n" +
 				"-ref [sequence file name (without extension or path!)] default=random; Possible values: The file name of a sequence data set without the extension (.fas, .fasta, .fa, .fna, .fastq, .fastq.gz, .gb or .gbk). Sets the reference sequence.\n" +
 				"-root [sequence file name (without extension or path!)] default=random; Possible values: The file name of a sequence data set without the extension (.fas, .fasta, .fa, .fna, .fastq, .fastq.gz, .gb or .gbk).  Specifies the root of the tree.\n" +
@@ -110,10 +110,11 @@ public class RealPhy {
 				//"	1=bowtie2\n" +
 				"-seedLength [integer] default=22 Possible values: Integer between 4 and 32; ONLY APPLICABLE FOR BOWTIE2; specifies k-mer length in bowtie2.\n" +
 				"-suffix [string] default=not set; appends a suffix to the reference output folder.\n" +
-				"-d/ elete If this option is set then all alignment output files and sequence cut files will be deleted after the program is terminated.\n" +
+				"-d/-delete If this option is set then all alignment output files and sequence cut files will be deleted after the program is terminated.\n" +
 				"-merge/-m If this option is set multiple references are selected, a final polymorphism file will be generated which combines all polymorphism files for all references. \n" +
 				"-gaps/-g If this option is set. The gapThreshold is automatically set to 100%, unless a different gapThreshold is specified.\n" +
 				"-config [string] this specifies the location of the config.txt. If not set it is assumed that the config.txt is in the working directory.\n" +
+				"-raxmlOptions [text file] This options allows the user to provide a custom set of options to RAxML in the first line of a given text file.\n" +
 				"-h/-help Shows this help.\n" +
 				"-version Prints the program's version." );
 				
@@ -645,7 +646,7 @@ public class RealPhy {
 			else if(treeBuilder==2){
 				Fasta.writePhylip(fas, phylip, 100);
 				int rand=(int)(Math.random()*1000000);
-				RunTreePrograms.runRAxML(phylip.getAbsoluteFile(), new File(path.get("RAXML")),seqLength,"raxml",(String)arguments.get("root"),!(Boolean)arguments.get("genes"),rand);
+				RunTreePrograms.runRAxML(phylip.getAbsoluteFile(), new File(path.get("RAXML")),seqLength,"raxml",(String)arguments.get("root"),!(Boolean)arguments.get("genes"),raxmlOptions,rand);
 				tree=new File(phylip.getParent()+"/RAxML_bestTree.raxml");
 			}else if(treeBuilder==3){
 				Fasta.writePhylip(fas, phylip, 10);
@@ -938,7 +939,7 @@ public class RealPhy {
 			return true;
 
 		}else if(arg.equals("suffix")){
-			return checkSuffix(value);
+			return value;
 
 		}else if(arg.equals("d")||arg.equals("delete")){
 			arguments.put("d", true);
@@ -951,6 +952,9 @@ public class RealPhy {
 			printHelp();
 			System.exit(0);
 			return null;
+		}else if(arg.equals("raxmlOptions")){
+			raxmlOptions=checkFile(value);
+			return raxmlOptions;
 		}else{
 			System.err.println("Do not recognize "+arg+".");
 			return null;
@@ -1041,8 +1045,15 @@ public class RealPhy {
 		return refs;
 	}
 	
-	public String checkSuffix(String suffix){
-		return suffix;
+
+	
+	public File checkFile(String file){
+		File in=new File(file);
+		if(in.exists()){
+			return in;
+		}else{
+			throw new RuntimeException("File "+file+" does not exist.");
+		}
 	}
 	
 	public Integer checkInteger(String arg,String value,int l,int u){

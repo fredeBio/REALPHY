@@ -21,7 +21,7 @@ public class RunTreePrograms {
 		return out;
 	}
 	
-	public static void runRAxML(File in,File RAxMLPath,int seqLength,String suffix,String root,boolean noGenes,int seed){
+	public static void runRAxML(File in,File RAxMLPath,int seqLength,String suffix,String root,boolean noGenes,File parameters,int seed){
 			File outFolder=new File(in.getParent());
 			if(!RAxMLPath.exists()){
 				System.err.println("Cannot find raxml executable. Not building tree. Exiting.");
@@ -39,11 +39,51 @@ public class RunTreePrograms {
 				File model=generateModelFile(seqLength,outFolder);
 				modelFile=" -q "+model.toString();
 			}
-			String raxMLcom=RAxMLPath+" -s "+in+" -w "+outFolder+" -m GTRGAMMA -p "+seed+" -n "+suffix+" "+root+" "+modelFile;
+			HashMap<String,Boolean> paraHM=getParameters(parameters);
+			String paraLine=getParametersLine(parameters);
+			String model=paraHM.containsKey("-m")?"":" -m GTRGAMMA ";
+			String seedString=paraHM.containsKey("-p")?"":" -p "+seed+" ";
+			root=paraHM.containsKey("-o")?"":root;
+			String raxMLcom=RAxMLPath+" -s "+in+" -w "+outFolder+model+seedString+" -n "+suffix+" "+root+" "+modelFile+" "+paraLine;
 			
 			runProgram(raxMLcom,"",outFolder);
 	}
 
+	private static HashMap<String,Boolean> getParameters(File in){
+		HashMap<String,Boolean> para=new HashMap<String, Boolean>();
+		try{
+			if(in!=null&&in.exists()){
+				BufferedReader br=new BufferedReader(new FileReader(in));
+				String line=br.readLine();
+				String split[]=line.split("\\s+");
+				for(int i=0;i<split.length;i++){
+					para.put(split[i], true);
+				}
+				br.close();
+			}
+		}catch(IOException e){
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return para;
+	}
+	
+	private static String getParametersLine(File in){
+		String para="";
+		try{
+			if(in!=null&&in.exists()){
+				BufferedReader br=new BufferedReader(new FileReader(in));
+				String line=br.readLine();
+				para=line;
+				br.close();
+			}
+		}catch(IOException e){
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return para;
+	}
+	
 	public static File runRAxMLGivenTopo(File topo,File in,File RAxMLPath,String suffix,String root,int seed,boolean delete,long time){
 		File outFolder=new File(in.getParent());
 		if(!RAxMLPath.exists()){
