@@ -138,7 +138,6 @@ public class Clashes implements Serializable{
 		while (it.hasNext()){
 			Entry<Integer,HashMap<Integer, ArrayList<Integer>>> e=it.next();
 			int i=e.getKey();
-			
 			if(posCol.get(i).containsKey(qIDs.get(i))){
 				ArrayList<Integer> pos=posCol.get(i).get(qIDs.get(i));
 				for(int j=0;j<pos.size();j++){

@@ -49,7 +49,7 @@ public class RunTreePrograms {
 			runProgram(raxMLcom,"",outFolder);
 	}
 
-	private static HashMap<String,Boolean> getParameters(File in){
+	public static HashMap<String,Boolean> getParameters(File in){
 		HashMap<String,Boolean> para=new HashMap<String, Boolean>();
 		try{
 			if(in!=null&&in.exists()){
@@ -68,7 +68,7 @@ public class RunTreePrograms {
 		return para;
 	}
 	
-	private static String getParametersLine(File in){
+	public static String getParametersLine(File in){
 		String para="";
 		try{
 			if(in!=null&&in.exists()){

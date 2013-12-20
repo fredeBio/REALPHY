@@ -3,18 +3,20 @@ package buildTreesFromSequenceData;
 import java.io.*;
 import java.util.*;
 
+import util.phylogenetics.RunTreePrograms;
+
 
 
 
 public class PerformBowtie {
-	public static ArrayList<File> runMultiple(File core,ArrayList<File> cutSequences,File outFolder,String bowtiepath,String buildpath,boolean runBowtie,int seedLength){
+	public static ArrayList<File> runMultiple(File core,ArrayList<File> cutSequences,File outFolder,String bowtiepath,String buildpath,boolean runBowtie,int seedLength,File bowtieOptions){
 		ArrayList<File> alignFiles=new ArrayList<File>();
 		for(int i=0;i<cutSequences.size();i++){
 			
 			
 			String suffix=samtoolsExist()?".bam":".sam";
 			File out=new File(outFolder+"/"+cutSequences.get(i).getName().split("\\.")[0]+suffix);
-			runBowtie(core,cutSequences.get(i),out,bowtiepath,buildpath,runBowtie, seedLength);
+			runBowtie(core,cutSequences.get(i),out,bowtiepath,buildpath,runBowtie, seedLength,bowtieOptions);
 			alignFiles.add(out);
 		}
 		return alignFiles;
@@ -38,7 +40,7 @@ public class PerformBowtie {
 		return bam;
 	}
 	
-	public static void runBowtie(File core,File cut,File out,String bowtiepath,String buildpath,boolean runBowtie,int seedLength){
+	public static void runBowtie(File core,File cut,File out,String bowtiepath,String buildpath,boolean runBowtie,int seedLength,File bowtieOptions){
 		File database=new File(core+".1.bt2");
 		//database creation
 		try{
@@ -57,17 +59,23 @@ public class PerformBowtie {
 					System.exit(-1);
 				}
 			}
-			//execute soap if it does not already exist
+			//TODO
+			HashMap<String,Boolean> paraHM=RunTreePrograms.getParameters(bowtieOptions);
+			String paraLine=RunTreePrograms.getParametersLine(bowtieOptions);
+			String seedString=paraHM.containsKey("-L")?"":" -L "+seedLength+" ";
+			String N=paraHM.containsKey("-N")?"":" -N 1 ";
+			String repeats=paraHM.containsKey("-k")?"":" -a ";
+			//execute bowtie if it does not already exist
 			if(!out.exists()||runBowtie){
 				File temp=new File(out+".temp");
 				
-				String SAMCommand=bowtiepath+" -x "+core+" -U "+ cut+" -S "+out+ " -N 1 --no-unal -a  --no-head  -L "+seedLength;
-				String BAMCommand=bowtiepath+" -x "+core+" -U "+ cut+" -S "+temp+ " -N 1 --no-unal -a  -L "+seedLength;
+				String SAMCommand=bowtiepath+" -x "+core+" -U "+ cut+" -S "+out+ N+" --no-unal -a  --no-head "+seedString+paraLine;
+				String BAMCommand=bowtiepath+" -x "+core+" -U "+ cut+" -S "+temp+ N+" --no-unal "+repeats+seedString+" "+paraLine;
 				if(out.toString().endsWith(".sam")){
 					
 					runSAM(SAMCommand);
 				}else{
-					//System.out.println(BAMCommand);
+
 					runBAM(BAMCommand,temp,out);
 					temp.delete();
 				}

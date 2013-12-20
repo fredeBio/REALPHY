@@ -60,16 +60,6 @@ import util.*;
 			
 		}
 		
-
-		
-
-		
-
-
-		
-
-		
-
 		
 		public void checkCoverageGP(PointSubstitutions pss,String strain){
 
