@@ -65,7 +65,8 @@ public class RealPhy {
 		}
 		//Cut sequences
 		long l2=System.currentTimeMillis();
-		System.out.println(l-l2);
+		double minutes=(l2-l)/60000.0;
+		System.out.println("Program execution took "+minutes+" minutes.");
 	}
 	
 	public void analyseDeletedSites(){
