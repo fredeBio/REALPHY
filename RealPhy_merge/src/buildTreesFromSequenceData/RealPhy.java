@@ -85,7 +85,7 @@ public class RealPhy {
 	}
 	public static void printHelp(){
 		System.out.print("Usage:\n" +
-				"java -jar BuildTrees.jar [Sequence folder] [Output folder] [Options]\n" +
+				"java -Xmx[available RAM in MB]m -jar RealPhy_v"+version+".jar [Sequence folder] [Output folder] [Options]\n" +
 				"Sequence folder needs to contain fasta files ending with .fas, .fna, .fasta or .fa, genbank files ending in .gbk or .gb and short read files in fastq format ending in .fastq or fastq.gz.\n" +
 				"The output folder needs to contain a file called \"config.txt\", which contains information about the location of the required executables such as bowtie2.\n\n"+
 				"Options:\n" +
