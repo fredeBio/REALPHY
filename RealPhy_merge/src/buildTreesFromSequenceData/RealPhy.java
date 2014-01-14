@@ -40,7 +40,7 @@ public class RealPhy {
 	File cutFolder;
 	Boolean gaps=false;
 	Double gapThreshold=0.0;
-	File raxmlOptions=null;
+	File treeOptions=null;
 	File bowtieOptions=null;
 
 	ArrayList<String> refs;
@@ -100,11 +100,12 @@ public class RealPhy {
 				"-genes If set then genes (CDS) are extracted from a given genbank file.\n" +
 				"-gapThreshold [double] default=0; specifies the proportion of input sequences that are allowed to contain gaps in the final sequence alignment (i.e. if set to 0.2 at most 20% of all nucleotides in each final alignment column are allowed to be gaps).\n" +
 				"-clean/-c If set then the whole analysis will be rerun and existing data will be overwritten!\n" +
-				"-treeBuilder [integer] default=2;\n" +
+				"-treeBuilder [integer] default=4;\n" +
 				"   0=Do not build a tree;\n" +
 				"   1=treepuzzle; \n" +
 				"   2=raxml\n" +
 				"   3=max. parsimony (dnapars)\n" +
+				"   4=PhyML (default)" +
 				"-quiet/-q If set then it suppresses any program output except for errors or warnings.\n" +
 				"-varOnly/-v If set then homologous positions that are conserved in all input sequences are put out. If set then the reconstructed tree may be wrong.\n" +
 				//"-aligner [integer] default=1;\n" +
@@ -116,7 +117,7 @@ public class RealPhy {
 				"-merge/-m If this option is set multiple references are selected, a final polymorphism file will be generated which combines all polymorphism files for all references. \n" +
 				"-gaps/-g If this option is set. The gapThreshold is automatically set to 100%, unless a different gapThreshold is specified.\n" +
 				"-config [string] this specifies the location of the config.txt. If not set it is assumed that the config.txt is in the working directory.\n" +
-				"-raxmlOptions [text file] This option allows the user to provide command line parameters to RAxML in the first line of a given text file.\n" +
+				"-treeOptions [text file] This option allows the user to provide command line parameters to RAxML in the first line of a given text file.\n" +
 				"-bowtieOptions [text file] This option allows the user to provide command line parameters to bowtie2 in the first line of a given text file.\n" +
 				"-h/-help Shows this help.\n" +
 				"-version Prints the program's version.\n" );
@@ -649,11 +650,16 @@ public class RealPhy {
 			else if(treeBuilder==2){
 				Fasta.writePhylip(fas, phylip, 100);
 				int rand=(int)(Math.random()*1000000);
-				RunTreePrograms.runRAxML(phylip.getAbsoluteFile(), new File(path.get("RAXML")),seqLength,"raxml",(String)arguments.get("root"),!(Boolean)arguments.get("genes"),raxmlOptions,rand);
+				RunTreePrograms.runRAxML(phylip.getAbsoluteFile(), new File(path.get("RAXML")),seqLength,"raxml",(String)arguments.get("root"),!(Boolean)arguments.get("genes"),treeOptions,rand);
 				tree=new File(phylip.getParent()+"/RAxML_bestTree.raxml");
 			}else if(treeBuilder==3){
 				Fasta.writePhylip(fas, phylip, 10);
 				tree=RunTreePrograms.runMaxPars(phylip.getAbsoluteFile(), new File(path.get("MaxPars")));
+			}else if(treeBuilder==4){
+				Fasta.writePhylip(fas, phylip, 100);
+				int rand=(int)(Math.random()*1000000);
+				RunTreePrograms.runPhyML(phylip.getAbsoluteFile(), new File(path.get("PhyML")),treeOptions,rand);
+				tree=new File(phylip+"_phyml_tree.txt");
 			}
 			if(tree!=null)printTree(tree);
 		}else if(treeBuilder>0){
@@ -734,7 +740,7 @@ public class RealPhy {
 		arguments.put("merge",new Boolean(false));
 		arguments.put("genes", new Boolean(false));
 		arguments.put("gapThreshold", new Double(0));
-		arguments.put("treeBuilder", new Integer(2));
+		arguments.put("treeBuilder", new Integer(4));
 		arguments.put("clean", new Boolean(false));
 		arguments.put("quiet", new Boolean(false));
 		arguments.put("varOnly", new Boolean(false));
@@ -891,7 +897,7 @@ public class RealPhy {
 				return null;
 			}
 		}else if(arg.equals("treeBuilder")){
-			return checkInteger(arg,value,0,2);
+			return checkInteger(arg,value,0,4);
 		}else if(arg.equals("aligner")){
 			return checkInteger(arg,value,soap2,bowtie2);
 		}else if(arg.equals("covWindow")){
@@ -955,9 +961,9 @@ public class RealPhy {
 			printHelp();
 			System.exit(0);
 			return null;
-		}else if(arg.equals("raxmlOptions")){
-			raxmlOptions=checkFile(value);
-			return raxmlOptions;
+		}else if(arg.equals("treeOptions")){
+			treeOptions=checkFile(value);
+			return treeOptions;
 		}else if(arg.equals("bowtieOptions")){
 			bowtieOptions=checkFile(value);
 			return bowtieOptions;

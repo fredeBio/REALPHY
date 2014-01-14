@@ -20,6 +20,23 @@ public class RunTreePrograms {
 		outtree.renameTo(out);
 		return out;
 	}
+
+	
+	public static void runPhyML(File in,File phymlPath,File parameters,int seed){
+		File outFolder=new File(in.getParent());
+		if(!phymlPath.exists()){
+			System.err.println("Cannot find phyml executable. Not building tree. Exiting.");
+			System.exit(-1);
+		}		
+
+		HashMap<String,Boolean> paraHM=getParameters(parameters);
+		String paraLine=getParametersLine(parameters);
+		String model=paraHM.containsKey("-m")?"":" -m GTR ";
+		String seedString=paraHM.containsKey("--r_seed")?"":" --r_seed "+seed+" ";
+		String PhyMLcom=phymlPath+" -i "+in+model+seedString+" "+paraLine;
+		
+		runProgram(PhyMLcom,"",outFolder);
+}
 	
 	public static void runRAxML(File in,File RAxMLPath,int seqLength,String suffix,String root,boolean noGenes,File parameters,int seed){
 			File outFolder=new File(in.getParent());
