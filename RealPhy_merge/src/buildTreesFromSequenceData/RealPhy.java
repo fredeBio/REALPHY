@@ -14,7 +14,7 @@ import util.*;
 
 public class RealPhy {
 	
-	static String version="v1.06";
+	static String version="v1.07";
 	
 	public static  final String fasExt[]=new String[]{"fas","fa","fasta","fna"};
 	public static final String gbkExt[]=new String[]{"gbk","gb"};
@@ -105,7 +105,7 @@ public class RealPhy {
 				"   1=treepuzzle; \n" +
 				"   2=raxml\n" +
 				"   3=max. parsimony (dnapars)\n" +
-				"   4=PhyML (default)" +
+				"   4=PhyML (default)\n" +
 				"-quiet/-q If set then it suppresses any program output except for errors or warnings.\n" +
 				"-varOnly/-v If set then homologous positions that are conserved in all input sequences are put out. If set then the reconstructed tree may be wrong.\n" +
 				//"-aligner [integer] default=1;\n" +
