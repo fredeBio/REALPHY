@@ -33,7 +33,8 @@ public class RunTreePrograms {
 		String paraLine=getParametersLine(parameters);
 		String model=paraHM.containsKey("-m")?"":" -m GTR ";
 		String seedString=paraHM.containsKey("--r_seed")?"":" --r_seed "+seed+" ";
-		String PhyMLcom=phymlPath+" -i "+in+model+seedString+" "+paraLine;
+		String bootstrap=paraHM.containsKey("-b")?"":" -b 0 ";
+		String PhyMLcom=phymlPath+" -i "+in+model+seedString+" "+paraLine+bootstrap;
 		
 		runProgram(PhyMLcom,"",outFolder);
 }
