@@ -121,7 +121,7 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
     	}
     	return tm;
     }
-	public GetPolymorphismsClass(ArrayList<File> soapFiles,ArrayList<String> references,File ReferenceFas,int Flank,int Quality,double PolymorphismThreshold,double FractionCovThreshold,int PerBaseCoverage,boolean subInfo,boolean NoGenes,boolean PrintInvariant,File OutFolder,boolean addReference,double gapThreshold,String ref) {
+	public GetPolymorphismsClass(ArrayList<File> soapFiles,ArrayList<String> references,File ReferenceFas,int Flank,int Quality,double PolymorphismThreshold,double FractionCovThreshold,int PerBaseCoverage,boolean subInfo,boolean NoGenes,boolean PrintInvariant,File OutFolder,boolean addReference,double gapThreshold,String ref) throws Exception{
 		Reference=ReferenceFas;
 		genes=!NoGenes;
 		flank=Flank;
@@ -156,7 +156,7 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 
 	public String getStrain(String name){
 		String split[]=name.split("_");
-		if(split[split.length-1].endsWith("fasta")||split[split.length-1].endsWith("fastq")){
+		if(split[split.length-1].endsWith("fasta")||split[split.length-1].endsWith("fastq")||split[split.length-1].endsWith("fastq.gz")){
 			StringBuffer newName=new StringBuffer();
 			newName.append(split[0]);
 			for(int i=1;i<split.length-1;i++){
@@ -175,7 +175,7 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 		return hm;
 	}
 	
-	void calculatePolymorphisms(ArrayList<File> alignmentFiles,ArrayList<String> references,boolean subInfo,boolean addReference){
+	void calculatePolymorphisms(ArrayList<File> alignmentFiles,ArrayList<String> references,boolean subInfo,boolean addReference) throws Exception{
 		ArrayList<Fasta> ref=Fasta.readFasta(Reference);
         int refLength=initGP(ref,addReference);
         HashMap<String,Boolean> hmRef=makeHash(references);
@@ -190,9 +190,9 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
         	for(int i=0;i<alignmentFiles.size();i++){
         		File alignmentFile=alignmentFiles.get(i);
         		int aligner=getAligner(alignmentFile);
-
-        		String strainIntern=alignmentFile.getName().split("\\.")[0];
+        		String strainIntern=RealPhy.getId(alignmentFile.getName());
         		String strainExtern=getStrain(strainIntern);
+
         		boolean basenames=subInfo&&hmRef.containsKey(strainExtern);
         		PointSubstitutions pss=aligner==soap?new PointSubstitutionsSoap(Reference,flank,alignmentFile,quality,basenames):new PointSubstitutionsBAM(Reference,flank,alignmentFile,quality,basenames);
         		HashMap<String,HashMap<Integer,Polymorph>> strainPolies=adjustGP(pss,basenames,strainExtern);
@@ -216,7 +216,7 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
         	while(it.hasNext()){
         		Entry<Integer,File> e=it.next();
         		File alignmentFile=e.getValue();
-        		String strainIntern=alignmentFile.getName().split("\\.")[0];
+        		String strainIntern=RealPhy.getId(alignmentFile.getName());
         		String strainExtern=getStrain(strainIntern);
         		int aligner=getAligner(alignmentFile);
         		boolean basenames=subInfo&&hmRef.containsKey(strainExtern);
@@ -230,6 +230,9 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
         		int mappedSites=pss.getMappedSites(perBaseCoverage);
         		System.out.println(strainExtern+"\t"+mappedSites+"/"+refLength+"|"+numberPolies);//"|"+(Runtime.getRuntime().totalMemory()/1048576)+"MB");
         		bwCore.write(strainExtern+"\t"+mappedSites+"/"+refLength+"|"+numberPolies+"\n");
+        		if(numberPolies==0){
+        			throw new Exception("For your sequence set there are no positions to which "+((1-gapThreshold)*100)+"% of all strains could be mapped. Calculation was aborted with strain "+strainExtern);
+        		}
         	}
         	writeCoverage(new File(outFolder+"/coverage.txt"));
         	bwCore.close();

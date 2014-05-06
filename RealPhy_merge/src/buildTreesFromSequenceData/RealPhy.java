@@ -14,13 +14,18 @@ import util.*;
 
 public class RealPhy {
 	
-	static String version="v1.07";
+	static String version="v1.08";
 	
 	public static  final String fasExt[]=new String[]{"fas","fa","fasta","fna"};
 	public static final String gbkExt[]=new String[]{"gbk","gb"};
+	public static final String fastqExt[]=new String[]{"fastq"};
+	public static final String gzExt[]=new String[]{"fastq.gz"};
+
 	File sequenceFolder=null;
 	File outFolder=null;
 	File alignmentFolder=null;
+	File masterOutFolder=null;
+
 	File mergeFolder=null;
 	ArrayList<String> reflist=new ArrayList<String>();
 	boolean clean;
@@ -118,7 +123,7 @@ public class RealPhy {
 				"-merge/-m If this option is set multiple references are selected, a final polymorphism file will be generated which combines all polymorphism files for all references. \n" +
 				"-gaps/-g If this option is set. The gapThreshold is automatically set to 100%, unless a different gapThreshold is specified.\n" +
 				"-config [string] this specifies the location of the config.txt. If not set it is assumed that the config.txt is in the working directory.\n" +
-				"-treeOptions [text file] This option allows the user to provide command line parameters to RAxML in the first line of a given text file.\n" +
+				"-treeOptions [text file] This option allows the user to provide command line parameters to the tree program in the first line of a given text file.\n" +
 				"-bowtieOptions [text file] This option allows the user to provide command line parameters to bowtie2 in the first line of a given text file.\n" +
 				"-h/-help Shows this help.\n" +
 				"-version Prints the program's version.\n" );
@@ -188,6 +193,18 @@ public class RealPhy {
 		}
 	}
 	
+	static String getId(String name){
+		String[] split=name.split("\\.");
+		StringBuffer sb=new StringBuffer();
+		
+		sb.append(split[0]);
+		int num=hasExtension(name, gzExt)?2:1;
+		for(int i=1;i<split.length-num;i++){
+			sb.append("."+split[i]);
+		}
+		return sb.toString();
+	}
+	
 	private void checkSequenceFiles(){
 		File[] list=sequenceFolder.listFiles();
 		HashMap< String,Boolean> hm=new HashMap<String, Boolean>();
@@ -195,8 +212,8 @@ public class RealPhy {
 		for(int i=0;i<list.length;i++){
 			File file=list[i];
 			String name=file.getName();
-			if(name.endsWith("fastq.gz")||file.getName().endsWith("fastq")||hasExtension(name, fasExt)||hasExtension(name, gbkExt)){
-				String id=file.getName().split("\\.")[0];
+			if(hasExtension(name,gzExt)||hasExtension(name,fastqExt)||hasExtension(name, fasExt)||hasExtension(name, gbkExt)){
+				String id=getId(name);
 				//String name10=name.length()>10?name.substring(0,10):name;
 				if(!hm.containsKey(id)){//&&!hm10.containsKey(name10)){
 				//hm10.put(name,true);
@@ -216,6 +233,7 @@ public class RealPhy {
 			FileHandler.deleteFolder(outFolder);
 		}
 	}
+	
 	public void runAnalyses(){
 		refs=!references?getReference():getReferences();
 		if(refs.size()==0){
@@ -227,7 +245,6 @@ public class RealPhy {
 				System.exit(-1);
 			}
 		}
-		File masterOutFolder=outFolder;
 		for(int i=0;i<refs.size();i++){
 			outFolder=new File(masterOutFolder+"/"+refs.get(i)+arguments.get("suffix"));
 			clean();
@@ -237,7 +254,6 @@ public class RealPhy {
 			String base=outFolder+"/PolySeqOut"+genes+varOnly+"/";
 
 			polymorphismsOutFolder=new File(base);
-			System.out.println(base);
 			if(!polymorphismsOutFolder.exists()){
 				polymorphismsOutFolder.mkdir();
 			}
@@ -248,7 +264,7 @@ public class RealPhy {
 			
 			System.out.println("Preparing reference...");
 			File core=!(Boolean)arguments.get("genes")==true?moveRefToCore(refs.get(i)):determineCore(refs.get(i));
-			ArrayList<File> missingAlignmentFiles=getMissingAlignments();
+			ArrayList<File> missingAlignmentFiles=getAlignments(false);
 			if(missingAlignmentFiles.size()>0){
 				System.out.println("Cut fasta sequence files into fragments...");
 				ArrayList<File> cuts=cutSequences();
@@ -256,7 +272,7 @@ public class RealPhy {
 				runAlignmentProgram(core,cuts);
 				FileHandler.deleteFolder(cutFolder);
 			}
-			ArrayList<File> alignmentFiles=getAlignments();
+			ArrayList<File> alignmentFiles=getAlignments(true);
 			System.out.println("Determine SNPs...");
 			File polymorphismsFas=getPolymorphisms(alignmentFiles, core,refs.get(i));
 			buildTree(polymorphismsFas);		
@@ -267,47 +283,40 @@ public class RealPhy {
 		}
 	}
 	
-	private ArrayList<File> getMissingAlignments(){
+	 void writeErrorFile(String errormsg){
+		try{
+			BufferedWriter bw=new BufferedWriter(new FileWriter(masterOutFolder+"/error.txt"));
+			bw.write(errormsg);
+			bw.close();
+		}catch(IOException e){
+			e.printStackTrace();
+			System.exit(-1);
+		}
+	}
+	
+	private ArrayList<File> getAlignments(boolean exists){
 		ArrayList<File> al=new ArrayList<File>();
 		File[] files=sequenceFolder.listFiles();
 		for(int i=0;i<files.length;i++){
 			String name=files[i].getName();
 			String suffix=aligner==soap2?".sop":PerformBowtie.samtoolsExist()?".bam":".sam";
 			File alFile=null;
+			String id=getId(name);
 			if(hasExtension(name,fasExt)||hasExtension(name,gbkExt)){
-				alFile=new File(alignmentFolder+"/"+name.split("\\.")[0]+"_"+arguments.get("readLength")+"fasta"+suffix);
-			}else if(files[i].getName().endsWith("fastq")){
-				alFile=new File(alignmentFolder+"/"+name.split("\\.")[0]+"_"+arguments.get("readLength")+"fastq"+suffix);
-			}else if(files[i].getName().endsWith("fastq.gz")){
-				alFile=new File(alignmentFolder+"/"+name.split("\\.")[0]+suffix);
+				alFile=new File(alignmentFolder+"/"+id+"_"+arguments.get("readLength")+"fasta"+suffix);
+			}else if(hasExtension(name,fastqExt)){
+				alFile=new File(alignmentFolder+"/"+id+"_"+arguments.get("readLength")+"fastq"+suffix);
+			}else if(hasExtension(name,gzExt)){
+				alFile=new File(alignmentFolder+"/"+id+suffix);
 			}
-			if(alFile!=null&&!alFile.exists()){
+			if(alFile!=null&&!(exists ^ alFile.exists())){
 				al.add(alFile);
 			}
 		}
 		return al;
 	}
 	
-	private ArrayList<File> getAlignments(){
-		ArrayList<File> al=new ArrayList<File>();
-		File[] files=sequenceFolder.listFiles();
-		for(int i=0;i<files.length;i++){
-			String name=files[i].getName();
-			String suffix=aligner==soap2?".sop":PerformBowtie.samtoolsExist()?".bam":".sam";
-			File alFile=null;
-			if(hasExtension(name,fasExt)||hasExtension(name,gbkExt)){
-				alFile=new File(alignmentFolder+"/"+name.split("\\.")[0]+"_"+arguments.get("readLength")+"fasta"+suffix);
-			}else if(files[i].getName().endsWith("fastq")){
-				alFile=new File(alignmentFolder+"/"+name.split("\\.")[0]+"_"+arguments.get("readLength")+"fastq"+suffix);
-			}else if(files[i].getName().endsWith("fastq.gz")){
-				alFile=new File(alignmentFolder+"/"+name.split("\\.")[0]+suffix);
-			}
-			if(alFile!=null&&alFile.exists()){
-				al.add(alFile);
-			}
-		}
-		return al;
-	}
+
 	
 	File getSequenceFile(File folder,String name){
 		for(int i=0;i<fasExt.length;i++){
@@ -363,11 +372,11 @@ public class RealPhy {
 			String name=list[i].getName();
 			
 			if(hasExtension(name,gbkExt)){
-				String id=name.split("\\.")[0];
+				String id=getId(name);
 				refIDs.add(id);
 				return refIDs;
 			}else if(hasExtension(name,fasExt)&&!(Boolean)arguments.get("genes")){
-				String id=name.split("\\.")[0];
+				String id=getId(name);
 				refIDs.add(id);
 				return refIDs;
 			}
@@ -403,7 +412,6 @@ public class RealPhy {
 	
 	public void mergeAnalyses(){
 		refs=!references?getReference():getReferences();
-		File masterOutFolder=outFolder;
 		mergeFolder=new File(masterOutFolder+"/merge/");
 		if(!mergeFolder.exists()){
 			mergeFolder.mkdir();
@@ -426,7 +434,7 @@ public class RealPhy {
 			//File cutFolder=new File(sequenceFolder+"/cut/");
 			alignmentFolder=!(Boolean)arguments.get("genes")?new File(outFolder+"/alignOut_NoGenes/"):new File(outFolder+"/alignOut/");
 			File core=!(Boolean)arguments.get("genes")==true?moveRefToCore(refs.get(i)):determineCore(refs.get(i));
-			ArrayList<File> missingAlignmentFiles=getMissingAlignments();
+			ArrayList<File> missingAlignmentFiles=getAlignments(false);
 			if(missingAlignmentFiles.size()>0){
 				System.out.println("Cut fasta sequence files into fragments...");
 				ArrayList<File> cuts=cutSequences();
@@ -436,7 +444,7 @@ public class RealPhy {
 			}
 			File columnsFile=new File(outFolder+"/"+refs.get(i)+"_columns.obj");
 			if(!columnsFile.exists()){
-				ArrayList<File> alignmentFiles=getAlignments();
+				ArrayList<File> alignmentFiles=getAlignments(true);
 				GetPolymorphisms gps=getColumns(alignmentFiles, core,refs.get(i));
 				System.out.println("Determining polymorphic columns...");
 				Clashes columns=gps.calculateColumns();
@@ -612,21 +620,34 @@ public class RealPhy {
 	public GetPolymorphisms getColumns(ArrayList<File> alignmentFiles,File core,String ref){
 		//determine polymorphisms
 		System.out.println("Determine polymorphisms...");
+		try{
 		GetPolymorphisms GPS=new GetPolymorphismWithGaps(alignmentFiles,refs, core, flank, (Integer)arguments.get("quality"), (Double)arguments.get("polyThreshold"), (Double)arguments.get("fractionCov"), perBaseCov,(Boolean)arguments.get("merge"),!(Boolean)arguments.get("genes"),gapThreshold,!(Boolean)arguments.get("varOnly"),polymorphismsOutFolder,ref);
 
 		File polymorphismsFas=GPS.writeSequences(); 
 		System.out.println("Building tree...");
 		buildTree(polymorphismsFas);
 		return GPS;
+		}catch(Exception e){
+			e.printStackTrace();
+			writeErrorFile(e.getMessage());
+			System.exit(-1);
+			return null;
+		}
 	} 
 	
 	public File getPolymorphisms(ArrayList<File> alignmentFiles,File core,String ref){
 		//determine polymorphisms
+		try{	
+			GetPolymorphisms GPS=new GetPolymorphismWithGaps(alignmentFiles, refs,core, flank, (Integer)arguments.get("quality"), (Double)arguments.get("polyThreshold"), (Double)arguments.get("fractionCov"), perBaseCov,(Boolean)arguments.get("merge"),!(Boolean)arguments.get("genes"),gapThreshold,!(Boolean)arguments.get("varOnly"),polymorphismsOutFolder,ref);
 
-		GetPolymorphisms GPS=new GetPolymorphismWithGaps(alignmentFiles, refs,core, flank, (Integer)arguments.get("quality"), (Double)arguments.get("polyThreshold"), (Double)arguments.get("fractionCov"), perBaseCov,(Boolean)arguments.get("merge"),!(Boolean)arguments.get("genes"),gapThreshold,!(Boolean)arguments.get("varOnly"),polymorphismsOutFolder,ref);
-
-		File polymorphismsFas=GPS.writeSequences();
-		return polymorphismsFas;
+			File polymorphismsFas=GPS.writeSequences();
+			return polymorphismsFas;
+		}catch(Exception e){
+			e.printStackTrace();
+			writeErrorFile(e.getMessage());
+			System.exit(-1);
+			return null;
+		}
 	}
 	
 	public void buildTree(File polymorphismsFas){
@@ -664,8 +685,9 @@ public class RealPhy {
 			}
 			if(tree!=null)printTree(tree);
 		}else if(treeBuilder>0){
+			String errormsg="TOO FEW SPECIES! For tree reconstruction at least four different isolates are required.";
 			System.err.println("TOO FEW SPECIES! For tree reconstruction at least four different isolates are required.");
-
+            writeErrorFile(errormsg);
 		}
 	}
 		
@@ -729,6 +751,7 @@ public class RealPhy {
 		path.put("BOWTIE2","bowtie2");
 		path.put("BOWTIE2BUILDER","bowtie2-build");
 		path.put("MaxPars","dnapars");
+		path.put("PhyML","phyml");
 		arguments.put("readLength", new Integer(50));
 		arguments.put("coreGenomes", new Integer(1));
 		arguments.put("perBaseScore", new Double(1));
@@ -758,7 +781,7 @@ public class RealPhy {
 	
 	private void setVariables(String[] args){
 		sequenceFolder=new File(args[0]);
-		outFolder=new File(args[1]);
+		masterOutFolder=new File(args[1]);
 		cutFolder=new File(sequenceFolder+"/cut/");
 		int i=2;
 		while(i<args.length){
@@ -793,7 +816,7 @@ public class RealPhy {
 			i+=add;
 		}
 		checkReference();
-		config=config==null?new File(outFolder+"/config.txt"):config;
+		config=config==null?new File(masterOutFolder+"/config.txt"):config;
 		if(config.exists()){
 			readConfig(config);
 		}else{
@@ -1045,8 +1068,7 @@ public class RealPhy {
 			BufferedReader br=new BufferedReader(new FileReader(in));
 			String line;
 			while((line=br.readLine())!=null){
-				String[] split=line.split("\\.");
-				refs.add(split[0]);
+				refs.add(getId(line));
 			}
 			
 			

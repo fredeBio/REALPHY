@@ -28,7 +28,7 @@ public class CutUpSequences {
 					hm.put(temp.getName(),true);
 					cutSeqs.add(temp);
 				}
-			}else if(files[i].getName().endsWith("fastq")){
+			}else if(RealPhy.hasExtension(name, RealPhy.fastqExt)){
 				//CUT FASTQ FILES!!!
 				
 				
@@ -37,7 +37,7 @@ public class CutUpSequences {
 					hm.put(temp.getName(),true);
 					cutSeqs.add(temp);
 				}
-			}else if(files[i].getName().endsWith("fastq.gz")){
+			}else if(RealPhy.hasExtension(name, RealPhy.gzExt)){
 				cutSeqs.add(files[i]);
 
 			}
@@ -47,8 +47,8 @@ public class CutUpSequences {
 	
 	public static File cutFastaSimple(File fas,int length,File cutFolder,boolean clean){
 		try{
-			File idF=new File(fas.getName());
-			String id=idF.getName().split("\\.")[0];
+			String name=fas.getName();
+			String id=RealPhy.getId(name);
 			if(!cutFolder.exists()){
 				cutFolder.mkdir();
 			}
@@ -112,8 +112,8 @@ public class CutUpSequences {
 	
 	public static File cutFastq(File fastq,int length,File cutFolder,boolean clean){
 		try{
-			File idF=new File(fastq.getName());
-			String id=idF.getName().split("\\.")[0];
+			String name=fastq.getName();
+			String id=RealPhy.getId(name);
 			if(!cutFolder.exists()){
 				cutFolder.mkdir();
 			}
@@ -193,8 +193,8 @@ public class CutUpSequences {
 	
 	public static File cutFasta(File fasta,int length,File cutFolder,boolean clean){
 		try{
-			File idF=new File(fasta.getName());
-			String id=idF.getName().split("\\.")[0];
+			String name=fasta.getName();
+			String id=RealPhy.getId(name);
 			if(!cutFolder.exists()){
 				cutFolder.mkdir();
 			}
@@ -203,7 +203,6 @@ public class CutUpSequences {
 				System.out.println(out+" already exists. Continue with next file.");
 				return out;
 			}
-			String name=fasta.getName();
 			ArrayList<Fasta> fas=RealPhy.hasExtension(name, RealPhy.fasExt)?Fasta.readFasta(fasta):new ReadGenbank(fasta).getSequence();
 			BufferedWriter bw=new BufferedWriter(new FileWriter(out));
 			boolean write=false;

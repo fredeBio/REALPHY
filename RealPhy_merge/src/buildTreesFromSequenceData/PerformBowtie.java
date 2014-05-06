@@ -15,7 +15,8 @@ public class PerformBowtie {
 			
 			
 			String suffix=samtoolsExist()?".bam":".sam";
-			File out=new File(outFolder+"/"+cutSequences.get(i).getName().split("\\.")[0]+suffix);
+			String name=cutSequences.get(i).getName();
+			File out=new File(outFolder+"/"+RealPhy.getId(name)+suffix);
 			runBowtie(core,cutSequences.get(i),out,bowtiepath,buildpath,runBowtie, seedLength,bowtieOptions);
 			alignFiles.add(out);
 		}
@@ -69,7 +70,7 @@ public class PerformBowtie {
 			if(!out.exists()||runBowtie){
 				File temp=new File(out+".temp");
 				
-				String SAMCommand=bowtiepath+" -x "+core+" -U "+ cut+" -S "+out+ N+" --no-unal -a  --no-head "+seedString+paraLine;
+				String SAMCommand=bowtiepath+" -x "+core+" -U "+ cut+" -S "+out+ N+" --no-unal "+repeats+seedString+paraLine;
 				String BAMCommand=bowtiepath+" -x "+core+" -U "+ cut+" -S "+temp+ N+" --no-unal "+repeats+seedString+" "+paraLine;
 				if(out.toString().endsWith(".sam")){
 					

@@ -295,10 +295,7 @@ public class Clashes implements Serializable{
 			for(int j=0;j<length;j++){
 				HashMap<Character,Integer> baseHash=new HashMap<Character, Integer>();
 				for(int i=0;i<qIDs.size();i++){
-					if(j==0){
-						System.err.println(qIDs.get(i));
-						System.err.println(baseCols.get(i));
-					}
+
 					String baseCol=baseCols.get(i);
 					ArrayList<Integer> col=qIDs.get(i);
 					char c=baseCol.charAt(j);
@@ -312,7 +309,6 @@ public class Clashes implements Serializable{
 				qIDsCons.add(getMax(colHash));
 				basesCons.append(getMax(baseHash));
 			}
-			System.err.println("next");
 
 			return new QueryBase(qIDsCons,basesCons);
 		}else{
