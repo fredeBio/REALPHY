@@ -619,10 +619,17 @@ public class RealPhy {
 		if(!alignmentFolder.exists()){
 			alignmentFolder.mkdir();
 		}
+		try{
+			ArrayList<File> alignmentFiles=aligner==soap2?PerformSoap.runMultipleSoaps(core,cutSequences,alignmentFolder,path.get("SOAP"),path.get("SOAPBUILDER"),runAlignment):PerformBowtie.runMultiple(core,cutSequences,alignmentFolder,path.get("BOWTIE2"),path.get("BOWTIE2BUILDER"),runAlignment,seedLength,bowtieOptions);
+			return alignmentFiles;
+		}catch(RealphyException e){
+			e.printStackTrace();
+			writeErrorFile(e.getMessage());
+			System.exit(-1);
+			return null;
+
+		}
 		
-		ArrayList<File> alignmentFiles=aligner==soap2?PerformSoap.runMultipleSoaps(core,cutSequences,alignmentFolder,path.get("SOAP"),path.get("SOAPBUILDER"),runAlignment):PerformBowtie.runMultiple(core,cutSequences,alignmentFolder,path.get("BOWTIE2"),path.get("BOWTIE2BUILDER"),runAlignment,seedLength,bowtieOptions);
-		
-		return alignmentFiles;
 	}
 
 	public void delete(ArrayList<File> files){
@@ -636,13 +643,13 @@ public class RealPhy {
 		//determine polymorphisms
 		System.out.println("Determine polymorphisms...");
 		try{
-		GetPolymorphisms GPS=new GetPolymorphismWithGaps(alignmentFiles,refs, core, flank, (Integer)arguments.get("quality"), (Double)arguments.get("polyThreshold"), (Double)arguments.get("fractionCov"), perBaseCov,(Boolean)arguments.get("merge"),!(Boolean)arguments.get("genes"),gapThreshold,!(Boolean)arguments.get("varOnly"),polymorphismsOutFolder,ref);
+			GetPolymorphisms GPS=new GetPolymorphismWithGaps(alignmentFiles,refs, core, flank, (Integer)arguments.get("quality"), (Double)arguments.get("polyThreshold"), (Double)arguments.get("fractionCov"), perBaseCov,(Boolean)arguments.get("merge"),!(Boolean)arguments.get("genes"),gapThreshold,!(Boolean)arguments.get("varOnly"),polymorphismsOutFolder,ref);
 
-		File polymorphismsFas=GPS.writeSequences(); 
-		System.out.println("Building tree...");
-		buildTree(polymorphismsFas);
-		return GPS;
-		}catch(Exception e){
+			File polymorphismsFas=GPS.writeSequences(); 
+			System.out.println("Building tree...");
+			buildTree(polymorphismsFas);
+			return GPS;
+		}catch(RealphyException e){
 			e.printStackTrace();
 			writeErrorFile(e.getMessage());
 			System.exit(-1);
@@ -657,7 +664,7 @@ public class RealPhy {
 
 			File polymorphismsFas=GPS.writeSequences();
 			return polymorphismsFas;
-		}catch(Exception e){
+		}catch(RealphyException e){
 			e.printStackTrace();
 			writeErrorFile(e.getMessage());
 			System.exit(-1);

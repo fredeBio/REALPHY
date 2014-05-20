@@ -9,7 +9,7 @@ import util.phylogenetics.RunTreePrograms;
 
 
 public class PerformBowtie {
-	public static ArrayList<File> runMultiple(File core,ArrayList<File> cutSequences,File outFolder,String bowtiepath,String buildpath,boolean runBowtie,int seedLength,File bowtieOptions){
+	public static ArrayList<File> runMultiple(File core,ArrayList<File> cutSequences,File outFolder,String bowtiepath,String buildpath,boolean runBowtie,int seedLength,File bowtieOptions) throws RealphyException{
 		ArrayList<File> alignFiles=new ArrayList<File>();
 		for(int i=0;i<cutSequences.size();i++){
 			
@@ -41,7 +41,7 @@ public class PerformBowtie {
 		return bam;
 	}
 	
-	public static void runBowtie(File core,File cut,File out,String bowtiepath,String buildpath,boolean runBowtie,int seedLength,File bowtieOptions){
+	public static void runBowtie(File core,File cut,File out,String bowtiepath,String buildpath,boolean runBowtie,int seedLength,File bowtieOptions)throws RealphyException{
 		File database=new File(core+".1.bt2");
 		//database creation
 		try{
@@ -92,26 +92,45 @@ public class PerformBowtie {
 		
 	}
 	
+	public static boolean checkEmpty(File temp){
+		try{
+			BufferedReader br=new BufferedReader(new FileReader(temp));
+			String line;
+			while((line=br.readLine())!=null){
+				if(!line.startsWith("@")){
+					br.close();
+					return false;
+				}
+			}
+		br.close();
+		}catch(IOException e){
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return true;
+	}
 	
-	public static void runBAM(String bowtiecom,File temp,File out)throws InterruptedException,IOException{
+	public static void runBAM(String bowtiecom,File temp,File out)throws InterruptedException,IOException,RealphyException{
 		
 		runSAM(bowtiecom);
 		
-		
-		String samtoolsCom="samtools view -bS "+temp+" -o "+out;
+		if(!checkEmpty(temp)){
+			String samtoolsCom="samtools view -bS  -o "+out+" "+temp;
 
-		Process samtools=Runtime.getRuntime().exec(samtoolsCom);
-		if(samtools.waitFor()!=0){
-			System.err.println(bowtiecom);
-			InputStream i=samtools.getErrorStream();
-			int c=0;
-			while((c=i.read())!=-1){
-				System.err.print((char)c);
+			Process samtools=Runtime.getRuntime().exec(samtoolsCom);
+			if(samtools.waitFor()!=0){
+				System.err.println(samtoolsCom);
+				InputStream i=samtools.getErrorStream();
+				int c=0;
+				while((c=i.read())!=-1){
+					System.err.print((char)c);
+				}
+				System.err.println("samtools was not successful!");
+				System.exit(-1);
 			}
-			System.err.println("Bowtie was not successful!");
-			System.exit(-1);
+		}else{
+			throw new RealphyException("Could not align any sequences to reference: "+bowtiecom);
 		}
-		
 
 
 

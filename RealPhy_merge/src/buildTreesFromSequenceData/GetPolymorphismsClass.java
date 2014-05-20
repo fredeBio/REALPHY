@@ -121,7 +121,7 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
     	}
     	return tm;
     }
-	public GetPolymorphismsClass(ArrayList<File> soapFiles,ArrayList<String> references,File ReferenceFas,int Flank,int Quality,double PolymorphismThreshold,double FractionCovThreshold,int PerBaseCoverage,boolean subInfo,boolean NoGenes,boolean PrintInvariant,File OutFolder,boolean addReference,double gapThreshold,String ref) throws Exception{
+	public GetPolymorphismsClass(ArrayList<File> soapFiles,ArrayList<String> references,File ReferenceFas,int Flank,int Quality,double PolymorphismThreshold,double FractionCovThreshold,int PerBaseCoverage,boolean subInfo,boolean NoGenes,boolean PrintInvariant,File OutFolder,boolean addReference,double gapThreshold,String ref) throws RealphyException{
 		Reference=ReferenceFas;
 		genes=!NoGenes;
 		flank=Flank;
@@ -175,7 +175,7 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
 		return hm;
 	}
 	
-	void calculatePolymorphisms(ArrayList<File> alignmentFiles,ArrayList<String> references,boolean subInfo,boolean addReference) throws Exception{
+	void calculatePolymorphisms(ArrayList<File> alignmentFiles,ArrayList<String> references,boolean subInfo,boolean addReference) throws RealphyException{
 		ArrayList<Fasta> ref=Fasta.readFasta(Reference);
         int refLength=initGP(ref,addReference);
         HashMap<String,Boolean> hmRef=makeHash(references);
@@ -231,7 +231,7 @@ public abstract class GetPolymorphismsClass implements GetPolymorphisms,Serializ
         		System.out.println(strainExtern+"\t"+mappedSites+"/"+refLength+"|"+numberPolies);//"|"+(Runtime.getRuntime().totalMemory()/1048576)+"MB");
         		bwCore.write(strainExtern+"\t"+mappedSites+"/"+refLength+"|"+numberPolies+"\n");
         		if(numberPolies==0){
-        			throw new Exception("For your sequence set there are no positions to which "+((1-gapThreshold)*100)+"% of all strains could be mapped. Calculation was aborted with strain "+strainExtern);
+        			throw new RealphyException("For your sequence set there are no positions to which "+((1-gapThreshold)*100)+"% of all strains could be mapped. Calculation was aborted with strain "+strainExtern);
         		}
         	}
         	writeCoverage(new File(outFolder+"/coverage.txt"));
