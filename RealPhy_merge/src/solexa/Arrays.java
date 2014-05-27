@@ -12,7 +12,7 @@ public class Arrays implements Serializable{
 	private static final long serialVersionUID = 1L;
 	double[][] array;
 	double[] cov;
-	HashMap<Integer,Integer>[] queryID;	
+	HashMap<Integer,Double>[] queryID;	
 	public final int length;
 	public Arrays(int Length){
 		length=Length;
@@ -24,6 +24,9 @@ public class Arrays implements Serializable{
 		cov=Coverage;
 	}
 
+	public double[] getCoverage(){
+		return cov;
+	}
 //	public void set(int pos,String base){
 //
 //		if(base.equalsIgnoreCase("AF") && pos<array.length)array[pos][0]++;
@@ -59,13 +62,13 @@ public class Arrays implements Serializable{
 	public void set(int pos,String base,int readPos,double weight){
 		set(pos,base,weight);
 		if(queryID[pos]==null){
-			HashMap<Integer,Integer> temp=new HashMap<Integer,Integer>();
-			temp.put(readPos,1);
+			HashMap<Integer,Double> temp=new HashMap<Integer,Double>();
+			temp.put(readPos,weight);
 			queryID[pos]=temp;
 		}else{
 			if(queryID[pos].containsKey(readPos)){
-				int item=queryID[pos].get(readPos);
-				item++;
+				double item=queryID[pos].get(readPos);
+				item+=weight;
 				queryID[pos].put(readPos,item);
 			}
 		}
@@ -86,7 +89,13 @@ public class Arrays implements Serializable{
 		return sum;
 	}
 	
-
+	public double numBasesNoGaps(int pos){
+		double sum=0;
+		for(int i=0;i<array[pos].length;i++){
+			sum+=i!=9&&i!=4?array[pos][i]:0;
+		}
+		return sum;
+	}
 	
 	public double get(int pos,String base){
 		base=base.toUpperCase();
@@ -114,7 +123,11 @@ public class Arrays implements Serializable{
 		return (numBases(pos)*1.0)/(cov[pos]*1.0);
 	}
 	
-	public HashMap<Integer,Integer> getQueryID(int pos){
+	public double getFrequencyNoGaps(int pos){
+		return (numBasesNoGaps(pos)*1.0)/(cov[pos]*1.0);
+	}
+	
+	public HashMap<Integer,Double> getQueryID(int pos){
 		return queryID[pos];
 	}
 	public int getMaxNuc(int pos){
@@ -128,12 +141,30 @@ public class Arrays implements Serializable{
 		
 	}
 
+
+	
 	public char getMaxNucForward(int pos){
 		int nuc=getMaxNuc(pos);
 		
 		return nuc==0||nuc==6?'A':nuc==1||nuc==5?'T':nuc==2||nuc==8?'C':nuc==3||nuc==7?'G':'-';
 		
 	}
+	
+	public double numPolymorphism(int pos,char base){
+		char nuc=base;
+		if(nuc=='A'){
+			return array[pos][0]+array[pos][6];
+		}else if(nuc=='T'){
+			return array[pos][1]+array[pos][5];
+		}else if(nuc=='C'){
+			return array[pos][2]+array[pos][8];
+		}else if(nuc=='G'){
+			return array[pos][3]+array[pos][7];
+		}else {
+			return array[pos][4]+array[pos][9];
+		}
+	}
+	
 	public double numMajorPolymorphism(int pos){
 		char nuc=getMaxNucForward(pos);
 		if(nuc=='A'){

@@ -9,6 +9,11 @@ import net.sf.samtools.*;
 
 
 public class PointSubstitutionsBAM extends PointSubstitutions {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public static void main(String args[]){
 		File refseq=new File("/home/frederic/Basel/randomAlignments/test/test2/sequences/S21.fas");
 		PointSubstitutionsBAM pss=new PointSubstitutionsBAM(refseq, 0, new File("/home/frederic/Basel/randomAlignments/test/test2/S21/alignOut_NoGenes/S12_50fasta.bam"), 20, false);
@@ -103,7 +108,7 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 				gap=true;
 			} 
 		}else{
-			for(int i=size-1;i<=0;i++){
+			for(int i=size-1;i>=0;i--){
 				if(regionsRead.charAt(i)=='m'){
 					readPos++;
 					gap=false;
@@ -170,7 +175,8 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 					int AS=(Integer)sr.getAttribute("AS");
 					while(sri.hasNext()&&sr.getReadName().equals((srnext=sri.next()).getReadName())&&srnext.getFlags()>=256){
 						int ASnext=(Integer)srnext.getAttribute("AS");
-						if(AS==ASnext)sams.add(srnext);
+						boolean readPair=sr.getReadPairedFlag()&&sr.getFirstOfPairFlag()&&srnext.getSecondOfPairFlag();
+						if(AS==ASnext||readPair)sams.add(srnext);
 						sr=srnext;
 					}
 					analyseAll(sams,quality,flank);
@@ -185,16 +191,19 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 		}
 		
 		private void analyseAll(ArrayList<SAMRecord> sams,int quality,int flank){
-			String qualityString=sams.get(0).getBaseQualityString();
 			double weight=1/(sams.size()*1.0);
 			for(int i=0;i<sams.size();i++){
-				analyseLine(sams.get(i), flank, quality, weight,qualityString);
+				analyseLine(sams.get(i), flank, quality, weight);
 			}
 		}
 		
-		private void analyseLine(SAMRecord sr,int flank,int quality,double weight,String qualityString){
+		private void analyseLine(SAMRecord sr,int flank,int quality,double weight){
+			if(sr.getReadPairedFlag() && sr.getProperPairFlag()){
+				weight=weight*2;
+			}
 			String cigar=sr.getCigarString();
 			int length=sr.getReadLength();
+			String qualityString=sr.getBaseQualityString();
 			String fastaId=sr.getReferenceName();
 			String sequence=sr.getReadString();
 			char orientation=sr.getReadNegativeStrandFlag()?'-':'+';

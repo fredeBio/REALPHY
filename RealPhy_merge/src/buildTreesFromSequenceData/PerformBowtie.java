@@ -40,8 +40,12 @@ public class PerformBowtie {
 		}
 		return bam;
 	}
-	
 	public static void runBowtie(File core,File cut,File out,String bowtiepath,String buildpath,boolean runBowtie,int seedLength,File bowtieOptions)throws RealphyException{
+		String single=" -U "+cut+" ";
+		runBowtie(core, single, out, bowtiepath, buildpath, runBowtie, seedLength, bowtieOptions);
+	}
+	
+	private static void runBowtie(File core,String singlePair,File out,String bowtiepath,String buildpath,boolean runBowtie,int seedLength,File bowtieOptions)throws RealphyException{
 		File database=new File(core+".1.bt2");
 		//database creation
 		try{
@@ -70,8 +74,8 @@ public class PerformBowtie {
 			if(!out.exists()||runBowtie){
 				File temp=new File(out+".temp");
 				
-				String SAMCommand=bowtiepath+" -x "+core+" -U "+ cut+" -S "+out+ N+" --no-unal "+repeats+seedString+paraLine;
-				String BAMCommand=bowtiepath+" -x "+core+" -U "+ cut+" -S "+temp+ N+" --no-unal "+repeats+seedString+" "+paraLine;
+				String SAMCommand=bowtiepath+" -x "+core+singlePair+" -S "+out+ N+" --no-unal "+repeats+seedString+paraLine;
+				String BAMCommand=bowtiepath+" -x "+core+singlePair+" -S "+temp+ N+" --no-unal "+repeats+seedString+" "+paraLine;
 				if(out.toString().endsWith(".sam")){
 					
 					runSAM(SAMCommand);
@@ -91,6 +95,13 @@ public class PerformBowtie {
 		}
 		
 	}
+	
+	public static void runBowtie(File core,File pair1,File pair2,File out,String bowtiepath,String buildpath,boolean runBowtie,int seedLength,File bowtieOptions)throws RealphyException{
+		String singlePair=" -1 "+pair1+" -2 "+pair2+" ";
+		runBowtie(core, singlePair, out, bowtiepath, buildpath, runBowtie, seedLength, bowtieOptions);
+		
+	}
+
 	
 	public static boolean checkEmpty(File temp){
 		try{

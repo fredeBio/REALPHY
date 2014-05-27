@@ -33,7 +33,7 @@ public class RealPhy {
 	
 	public static  final String fasExt[]=new String[]{"fas","fa","fasta","fna"};
 	public static final String gbkExt[]=new String[]{"gbk","gb"};
-	public static final String fastqExt[]=new String[]{"fastq"};
+	public static final String fastqExt[]=new String[]{"fastq","fq"};
 	public static final String gzExt[]=new String[]{"fastq.gz"};
 
 	File sequenceFolder=null;
@@ -401,7 +401,7 @@ public class RealPhy {
 	
 	public static boolean hasExtension(String name,String ext[]){
 		for(int i=0;i<ext.length;i++){
-			if(name.endsWith("."+ext[i]))return true;
+			if(name.toLowerCase().endsWith("."+ext[i]))return true;
 		}
 
 		return false;

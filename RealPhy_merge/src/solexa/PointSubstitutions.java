@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,8 +14,13 @@ import util.DNAmanipulations;
 import util.Fasta;
 import util.Info;
 
-public abstract class PointSubstitutions {
+public abstract class PointSubstitutions implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public PointSubstitutions(File RefSeq,int flank,File AlignmentFile,int quality,boolean subInfo){
 		this(RefSeq,flank,AlignmentFile,quality,1,subInfo);
 	}
@@ -332,22 +338,22 @@ public abstract class PointSubstitutions {
 					outDir + "/" + refseq.getName() + ".out")));
 			int occ=0;
 			int changes=0;
-			bw.write("Pos\tcov\torigF\tF\tA\tT\tG\tC\tR\tA\tT\tG\tC\tGene\n");
+			bw.write("Pos\tcov\torigF\tF\tA\tT\tG\tC\tR\tA\tT\tG\tC\t-R\t-F\n");
 			for(int i=0;i<alName.size();i++){
 				String gene=fasta.get(alName.get(i));
 				Arrays geneBases=bases.get(alName.get(i));
 				double[] geneCoverage=coverage.get(alName.get(i));
-				for(int j=0;j<geneCoverage.length;j++){
-					System.out.println("cov "+geneCoverage[j]+"|");
-					System.out.println("pol "+geneBases.numBases(j)+"|");
-
-				}
-				System.out.println();
+//				for(int j=0;j<geneCoverage.length;j++){
+//					System.out.println("cov "+geneCoverage[j]+"|");
+//					System.out.println("pol "+geneBases.numBases(j)+"|");
+//
+//				}
+//				System.out.println();
 
 				int cov=0;
 				//System.out.println(geneBases.length);
-				System.out.println(geneBases.length);
-				System.out.println(threshold);
+				//System.out.println(geneBases.length);
+				//System.out.println(threshold);
 
 				for (int j = 1; j < geneBases.length-1-2*flank; j++) {
 					cov+=geneCoverage[j];
@@ -372,13 +378,13 @@ public abstract class PointSubstitutions {
 								+ "\t" + geneBases.get(j+1, "GR") + "\t"
 								+ geneBases.get(j+1, "CR") +"\n");*/
 					//actual base
-					bw.write(geneBases.numBases(j)+"\t"+alName.get(i)+"\t"+j + "\t" + geneCoverage[j] + "\t" + gene.charAt(j-1+flank)
-							+ "\t\t" + geneBases.get(j, "AF") + "\t"
-							+ geneBases.get(j, "TF") + "\t" + geneBases.get(j, "GF")
-							+ "\t" + geneBases.get(j, "CF") + "\t\t"
-							+ geneBases.get(j, "AR") + "\t" + geneBases.get(j, "TR")
-							+ "\t" + geneBases.get(j, "GR") + "\t"
-							+ geneBases.get(j, "CR") +"\t");
+					bw.write(geneBases.numBases(j)+"\t"+alName.get(i)+"\t"+j + "\t" + round(geneCoverage[j],1) + "\t" + gene.charAt(j-1+flank)
+							+ "\t\t" + round(geneBases.get(j, "AF"),1) + "\t"
+							+ round(geneBases.get(j, "TF"),1) + "\t" + round(geneBases.get(j, "GF"),1)
+							+ "\t" + round(geneBases.get(j, "CF"),1) + "\t\t"
+							+ round(geneBases.get(j, "AR"),1) + "\t" + round(geneBases.get(j, "TR"),1)
+							+ "\t" + round(geneBases.get(j, "GR"),1) + "\t"
+							+ round(geneBases.get(j, "CR"),1) +"\t"+ round(geneBases.get(j, "-R"),1) +"\t"+ round(geneBases.get(j, "-F"),1) +"\t");
 
 //					int frame=(j-1)%3;
 //					String triplet=gene.substring(j-frame-1+flank,j+3-frame-1+flank);
@@ -417,7 +423,17 @@ public abstract class PointSubstitutions {
 		}
 
 	}
+	public static double round(double num, int n) {
+	    if(num == 0) {
+	        return 0;
+	    }
 
+	    final int power = n;
+
+	    final double magnitude = Math.pow(10, power);
+	    final long shifted = Math.round(num*magnitude);
+	    return shifted/magnitude;
+	}
 	
 	public ArrayList<Info> getCoveredAreas(String id,double fractionCov,int covWindow){
 		int stepsize=10;
