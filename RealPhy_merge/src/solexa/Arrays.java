@@ -12,7 +12,7 @@ public class Arrays implements Serializable{
 	private static final long serialVersionUID = 1L;
 	double[][] array;
 	double[] cov;
-	HashMap<Integer,Double>[] queryID;	
+	HashMap<Integer,Integer>[] queryID;	
 	public final int length;
 	public Arrays(int Length){
 		length=Length;
@@ -62,13 +62,13 @@ public class Arrays implements Serializable{
 	public void set(int pos,String base,int readPos,double weight){
 		set(pos,base,weight);
 		if(queryID[pos]==null){
-			HashMap<Integer,Double> temp=new HashMap<Integer,Double>();
-			temp.put(readPos,weight);
+			HashMap<Integer,Integer> temp=new HashMap<Integer,Integer>();
+			temp.put(readPos,1);
 			queryID[pos]=temp;
 		}else{
 			if(queryID[pos].containsKey(readPos)){
-				double item=queryID[pos].get(readPos);
-				item+=weight;
+				int item=queryID[pos].get(readPos);
+				item+=1;
 				queryID[pos].put(readPos,item);
 			}
 		}
@@ -127,7 +127,7 @@ public class Arrays implements Serializable{
 		return (numBasesNoGaps(pos)*1.0)/(cov[pos]*1.0);
 	}
 	
-	public HashMap<Integer,Double> getQueryID(int pos){
+	public HashMap<Integer,Integer> getQueryID(int pos){
 		return queryID[pos];
 	}
 	public int getMaxNuc(int pos){
