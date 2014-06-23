@@ -31,7 +31,7 @@ public class ReadGenbank {
 	}
 	public static void main(String args[]){
 		ReadGenbank rgb=new ReadGenbank(new File(args[0]));
-		System.out.println(rgb.infoHash.get("pfs"));
+		System.out.println(rgb.getSequence());
 		
 	}
 	

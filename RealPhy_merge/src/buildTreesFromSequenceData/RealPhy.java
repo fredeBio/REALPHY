@@ -354,6 +354,7 @@ public class RealPhy {
 		}
 		File core=new File(coreFolder+"/"+ref+".fas");
 		if(!core.exists()){
+			System.out.println(sequenceFile+" "+core);
 			copyFasta(sequenceFile,core);
 			runAlignment=true;
 		}else{
@@ -365,7 +366,7 @@ public class RealPhy {
 	
 	private void copyFasta(File from,File to){
 		ArrayList<Fasta> fas;
-		if(from.getName().endsWith(".gbk")){
+		if(hasExtension(from.getName(),gbkExt)){
 			fas=new ReadGenbank(from).getSequence();
 		}else{
 			fas=Fasta.readFasta(from);
