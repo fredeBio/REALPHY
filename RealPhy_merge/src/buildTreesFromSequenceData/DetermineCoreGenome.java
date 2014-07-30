@@ -11,6 +11,16 @@ public class DetermineCoreGenome {
 		runDetermineCoreGenome(args);
 	}
 
+	private static File getGBKFile(String prefix,String[] ext){
+		for(int i=0;i<ext.length;i++){
+			File gbk=new File(prefix+"."+ext[i]);
+			if(gbk.exists()){
+				return gbk;
+			}
+		}
+		return null;
+	}
+	
 	public static ArrayList<File> runDetermineCoreGenome(String args[]){
 		File inFolder=new File(args[0]);
 		File outFolder=new File(args[1]);
@@ -45,7 +55,11 @@ public class DetermineCoreGenome {
 					String id=ids.get(i);
 					System.out.println(id);
 
-					File gbk=new File(inFolder+"/"+id+".gbk");
+					File gbk=getGBKFile(inFolder+"/"+id,RealPhy.gbkExt);
+					if(gbk==null){
+						System.err.println("Cannot find genbank file. Probably an error in the code!");
+						System.exit(-1);
+					}
 					//HashMap<String,String> fas=Fasta.fasToHash(Fasta.readFasta(new File(inFolder+"/"+id+".fas")));
 					k++;
 					if(k==1){
@@ -109,7 +123,8 @@ public class DetermineCoreGenome {
 		ArrayList<File> alist=new ArrayList<File>();
 		int refNumber=-1;
 		for(int i=0;i<list.length;i++){
-			if(list[i].getName().endsWith(".gbk")||(list[i].getName().endsWith(".fas"))){
+			String name=list[i].getName();
+			if(RealPhy.hasExtension(name,RealPhy.gbkExt)||RealPhy.hasExtension(name,RealPhy.fasExt)){
 				alist.add(list[i]);
 				if(ref.equals(list[i].getName().split("\\.")[0])){
 					refNumber=alist.size()-1;

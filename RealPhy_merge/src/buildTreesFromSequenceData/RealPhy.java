@@ -64,11 +64,12 @@ public class RealPhy {
 	File bowtieOptions=null;
 
 	ArrayList<String> refs;
-	public static void main(String args[]){
+	public static void main(String args[])throws RealphyException{
 		long l=System.currentTimeMillis();
 		if(args.length>1){
 			RealPhy bt=new RealPhy(args);
 			if((Boolean)bt.arguments.get("merge")){
+				
 				bt.mergeAnalyses();
 			
 			}
@@ -426,7 +427,10 @@ public class RealPhy {
 	
 
 	
-	public void mergeAnalyses(){
+	public void mergeAnalyses() throws RealphyException{
+		if((Boolean)arguments.get("genes")){
+			throw new RealphyException("The -genes option does currently not work in conjunction with the -merge option. I will fix this problem as soon as possible.\n");
+		}
 		refs=!references?getReference():getReferences();
 		mergeFolder=new File(masterOutFolder+"/merge/");
 		if(!mergeFolder.exists()){
@@ -887,6 +891,7 @@ public class RealPhy {
 			String line="";
 			while((line=br.readLine())!=null){
 				String[] split=line.split("\\s+");
+				if(line.length()<4)continue;
 				path.put(split[0],split[1]);
 				File temp=new File(split[1]);
 				if(!temp.exists()){
