@@ -642,10 +642,11 @@ public abstract class PointSubstitutions implements Serializable{
 			}else{
 				covNeg[sub]+=weight;
 			}
+			if(subInfo&&!gap){
+				addBaseNames(fastaId, sub, readID, subpos, orientation,qualityString.length());
+			}
 		}
-		if(subInfo&&!gap){
-			addBaseNames(fastaId, sub, readID, subpos, orientation,qualityString.length());
-		}
+
 	 }
 		 
 	 void addBaseNames(String fastaId,int sub,String readID,int subpos,char orientation,int length){

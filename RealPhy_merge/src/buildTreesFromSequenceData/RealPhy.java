@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 public class RealPhy {
 	
-	static String version="v1.08";
+	static String version="v1.09";
 	
 	public static  final String fasExt[]=new String[]{"fas","fa","fasta","fna"};
 	public static final String gbkExt[]=new String[]{"gbk","gb"};
@@ -428,9 +428,9 @@ public class RealPhy {
 
 	
 	public void mergeAnalyses() throws RealphyException{
-		if((Boolean)arguments.get("genes")){
-			throw new RealphyException("The -genes option does currently not work in conjunction with the -merge option. I will fix this problem as soon as possible.\n");
-		}
+//		if((Boolean)arguments.get("genes")){
+//			throw new RealphyException("The -genes option does currently not work in conjunction with the -merge option. I will fix this problem as soon as possible.\n");
+//		}
 		refs=!references?getReference():getReferences();
 		mergeFolder=new File(masterOutFolder+"/merge/");
 		if(!mergeFolder.exists()){
