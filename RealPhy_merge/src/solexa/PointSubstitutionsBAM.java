@@ -173,7 +173,7 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 					sams.add(srnext!=null?srnext:(srnext=sri.next()));
 					SAMRecord sr=srnext;
 					int AS=(Integer)sr.getAttribute("AS");
-					while(sri.hasNext()&&sr.getReadName().equals((srnext=sri.next()).getReadName())&&srnext.getFlags()>=256){
+					while(sri.hasNext()&&sr.getReadName().equals((srnext=sri.next()).getReadName())){//&&srnext.getFlags()>=256){
 						int ASnext=(Integer)srnext.getAttribute("AS");
 						boolean readPair=sr.getReadPairedFlag()&&sr.getFirstOfPairFlag()&&srnext.getSecondOfPairFlag();
 						if(AS==ASnext||readPair)sams.add(srnext);
@@ -192,7 +192,9 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 		
 		private void analyseAll(ArrayList<SAMRecord> sams,int quality,int flank){
 			double weight=1/(sams.size()*1.0);
+			//System.out.println(sams.size()+" "+weight);
 			for(int i=0;i<sams.size();i++){
+				
 				analyseLine(sams.get(i), flank, quality, weight);
 			}
 		}
@@ -200,6 +202,10 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 		private void analyseLine(SAMRecord sr,int flank,int quality,double weight){
 			if(sr.getReadPairedFlag() && sr.getProperPairFlag()){
 				weight=weight*2;
+			}
+			if(weight>1){
+				System.err.println("Weight is too large (>1): "+weight+" for read "+sr.getReadName()+" in file "+this.alignmentFile+".");
+				System.exit(-1);
 			}
 			String cigar=sr.getCigarString();
 			int length=sr.getReadLength();

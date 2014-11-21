@@ -12,12 +12,19 @@ public class PerformBowtie {
 	public static ArrayList<File> runMultiple(File core,ArrayList<File> cutSequences,File outFolder,String bowtiepath,String buildpath,boolean runBowtie,int seedLength,File bowtieOptions) throws RealphyException{
 		ArrayList<File> alignFiles=new ArrayList<File>();
 		for(int i=0;i<cutSequences.size();i++){
-			
+			String name=cutSequences.get(i).getName();
+			if(name.endsWith("R2.fastq.gz"))continue;
 			
 			String suffix=samtoolsExist()?".bam":".sam";
-			String name=cutSequences.get(i).getName();
 			File out=new File(outFolder+"/"+RealPhy.getId(name)+suffix);
-			runBowtie(core,cutSequences.get(i),out,bowtiepath,buildpath,runBowtie, seedLength,bowtieOptions);
+			if(!name.endsWith("R1.fastq.gz")){
+				runBowtie(core,cutSequences.get(i),out,bowtiepath,buildpath,runBowtie, seedLength,bowtieOptions);
+			}else{
+				File pair1=cutSequences.get(i);
+				String newName=name.substring(0,name.length()-11)+"R2.fastq.gz";
+				File pair2=new File(cutSequences.get(i).getParent()+"/"+newName);
+				runBowtie(core, pair1, pair2, out, bowtiepath, buildpath, runBowtie, seedLength, bowtieOptions);
+			}
 			alignFiles.add(out);
 		}
 		return alignFiles;
@@ -42,10 +49,13 @@ public class PerformBowtie {
 	}
 	public static void runBowtie(File core,File cut,File out,String bowtiepath,String buildpath,boolean runBowtie,int seedLength,File bowtieOptions)throws RealphyException{
 		String single=" -U "+cut+" ";
-		runBowtie(core, single, out, bowtiepath, buildpath, runBowtie, seedLength, bowtieOptions);
+		runBowtieInternal(core, single, out, bowtiepath, buildpath, runBowtie, seedLength, bowtieOptions);
 	}
-	
-	private static void runBowtie(File core,String singlePair,File out,String bowtiepath,String buildpath,boolean runBowtie,int seedLength,File bowtieOptions)throws RealphyException{
+	public static void runBowtie(File core,String cut,File out,String bowtiepath,String buildpath,boolean runBowtie,int seedLength,File bowtieOptions)throws RealphyException{
+		String single=" -U "+cut+" ";
+		runBowtieInternal(core, single, out, bowtiepath, buildpath, runBowtie, seedLength, bowtieOptions);
+	}
+	private static void runBowtieInternal(File core,String singlePair,File out,String bowtiepath,String buildpath,boolean runBowtie,int seedLength,File bowtieOptions)throws RealphyException{
 		File database=new File(core+".1.bt2");
 		//database creation
 		try{
@@ -98,7 +108,7 @@ public class PerformBowtie {
 	
 	public static void runBowtie(File core,File pair1,File pair2,File out,String bowtiepath,String buildpath,boolean runBowtie,int seedLength,File bowtieOptions)throws RealphyException{
 		String singlePair=" -1 "+pair1+" -2 "+pair2+" ";
-		runBowtie(core, singlePair, out, bowtiepath, buildpath, runBowtie, seedLength, bowtieOptions);
+		runBowtieInternal(core, singlePair, out, bowtiepath, buildpath, runBowtie, seedLength, bowtieOptions);
 		
 	}
 

@@ -2,6 +2,7 @@ package buildTreesFromSequenceData;
 
 import java.io.*;
 import java.util.*;
+import java.util.zip.GZIPOutputStream;
 
 import util.*;
 
@@ -117,12 +118,16 @@ public class CutUpSequences {
 			if(!cutFolder.exists()){
 				cutFolder.mkdir();
 			}
-			File out=new File(cutFolder+"/"+id+"_"+length+"fastq.fastq");
+			File out=new File(cutFolder+"/"+id+"_"+length+"fastq.fastq.gz");
 			if(out.exists()&&!clean){
 				System.out.println(out+" already exists. Continue with next file.");
 				return out;
 			}
-			BufferedWriter bw=new BufferedWriter(new FileWriter(out));
+			FileOutputStream fos = new FileOutputStream(out);
+            GZIPOutputStream gzipOS = new GZIPOutputStream(fos);
+            OutputStreamWriter osw=new OutputStreamWriter(gzipOS);
+			BufferedWriter bw=new BufferedWriter (osw);
+			
 			BufferedReader br=new BufferedReader(new FileReader(fastq));
 			String line="";
 			int j=0;
@@ -151,6 +156,7 @@ public class CutUpSequences {
 			br.close();
 			bw.close();
 			if(write){
+				
 				return out;
 			}else return null;
 		}catch(IOException e){
@@ -198,13 +204,17 @@ public class CutUpSequences {
 			if(!cutFolder.exists()){
 				cutFolder.mkdir();
 			}
-			File out=new File(cutFolder+"/"+id+"_"+length+"fasta.fastq");
+			File out=new File(cutFolder+"/"+id+"_"+length+"fasta.fastq.gz");
 			if(out.exists()&&!clean){
 				System.out.println(out+" already exists. Continue with next file.");
 				return out;
 			}
 			ArrayList<Fasta> fas=RealPhy.hasExtension(name, RealPhy.fasExt)?Fasta.readFasta(fasta):new ReadGenbank(fasta).getSequence();
-			BufferedWriter bw=new BufferedWriter(new FileWriter(out));
+			FileOutputStream fos = new FileOutputStream(out);
+            GZIPOutputStream gzipOS = new GZIPOutputStream(fos);
+            OutputStreamWriter osw=new OutputStreamWriter(gzipOS);
+
+			BufferedWriter bw=new BufferedWriter(osw);
 			boolean write=false;
 			int size=fas.size();
 			//counts the total number of nucleotides in the fasta file
