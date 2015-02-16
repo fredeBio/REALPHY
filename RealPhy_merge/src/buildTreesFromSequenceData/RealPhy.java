@@ -112,7 +112,7 @@ public class RealPhy {
 				"The output folder needs to contain a file called \"config.txt\", which contains information about the location of the required executables such as bowtie2.\n\n"+
 				"Options:\n" +
 				"-readLength [integer] default=50 Possible values: Integer greater than 20; Size of fragments that are to be produced from the FASTA/GBK input sequences. With longer read lengths the mapping will take longer but will also map more divergent sequences.\n" +
-				"-quality [integer] default=20; Possible values: Integer value between 0 and 41 that corresponds to quality values in fastq files. Bases with values below thresold in fastq file will not be considered (fasta files will be converted into fastq files with a quality of 20).\n" +
+				"-quality [integer] default=20; Possible values: Integer value between 0 and 41 that corresponds to quality values in fastq files (PHRED+33). Bases with values below thresold in fastq file will not be considered (fasta files will be converted into fastq files with a quality of 20).\n" +
 				"-polyThreshold [double] default=0.95; Possible values: Double value between 0 and 1.  Polymorphisms that occur at lower frequency than the specified threshold at any given position of the alignment will not be considered.\n"+
 				"-perBaseCov [integer] default=10; Possible values: Integer greater than or equal to 10.  Polymorphisms will only be extracted for regions that are covered by more than the set threshold of reads.\n" +
 				"-ref [sequence file name (without extension or path!)] default=random; Possible values: The file name of a sequence data set without the extension (.fas, .fasta, .fa, .fna, .fastq, .fastq.gz, .gb or .gbk). Sets the reference sequence.\n" +
@@ -321,7 +321,8 @@ public class RealPhy {
 			if(hasExtension(name,fasExt)||hasExtension(name,gbkExt)){
 				alFile=new File(alignmentFolder+"/"+id+"_"+arguments.get("readLength")+"fasta"+suffix);
 			}else if(hasExtension(name,fastqExt)){
-				alFile=new File(alignmentFolder+"/"+id+"_"+arguments.get("readLength")+"fastq"+suffix);
+				//alFile=new File(alignmentFolder+"/"+id+"_"+arguments.get("readLength")+"fastq"+suffix);
+				alFile=new File(alignmentFolder+"/"+id+suffix);
 			}else if(hasExtension(name,gzExt)){
 				alFile=new File(alignmentFolder+"/"+id+suffix);
 			}

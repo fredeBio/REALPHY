@@ -30,14 +30,15 @@ public class CutUpSequences {
 					cutSeqs.add(temp);
 				}
 			}else if(RealPhy.hasExtension(name, RealPhy.fastqExt)){
-				//CUT FASTQ FILES!!!
+				//DO NOT CUT FASTQ FILES ANYMORE!!!
 				
-				
-				File temp=cutFastq(files[i],length,outputFolder,clean);
-				if(temp!=null&&!hm.containsKey(temp.getName())){
-					hm.put(temp.getName(),true);
-					cutSeqs.add(temp);
-				}
+				cutSeqs.add(files[i]);
+
+//				File temp=cutFastq(files[i],length,outputFolder,clean);
+//				if(temp!=null&&!hm.containsKey(temp.getName())){
+//					hm.put(temp.getName(),true);
+//					cutSeqs.add(temp);
+//				}
 			}else if(RealPhy.hasExtension(name, RealPhy.gzExt)){
 				cutSeqs.add(files[i]);
 

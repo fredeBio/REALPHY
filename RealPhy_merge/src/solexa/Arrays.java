@@ -59,6 +59,28 @@ public class Arrays implements Serializable{
 		//System.err.println("Do not recognize "+ base+"!");
 		
 	}
+	public static String[] bases=new String[]{"AF","TF","CF","GF","-F","AR","TR","CR","GR","-R"};
+
+	static HashMap<Character,Character> complement=new HashMap<Character, Character>();
+	static{
+		complement.put('A', 'T');
+		complement.put('T', 'A');
+		complement.put('C', 'G');
+		complement.put('G', 'C');
+	}
+	
+	public void addPseudoCount(double count,String ref){
+		for(int i=1;i<array.length;i++){
+			cov[i]+=count*8;
+			char r=ref.charAt(i-1);
+			char c=complement.get(r);
+			for(int j=0;j<array[i].length;j++){
+				if((bases[j].charAt(1)=='F'&&r!=bases[j].charAt(0))||(bases[j].charAt(1)=='R'&&c!=bases[j].charAt(0))){
+					array[i][j]+=count;
+				}
+			}
+		}
+	}
 	public void set(int pos,String base,int readPos,double weight){
 		set(pos,base,weight);
 		if(queryID[pos]==null){

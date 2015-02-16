@@ -430,7 +430,7 @@ public class Fasta {
 				if(line.startsWith(">")){
 					fasta.add(new Fasta(line.replace(">",""),""));
 				}else{
-					line.replaceAll("\\s", "");
+					line=line.replaceAll("\\s", "");
 					if(fasta.size()>0){
 						fasta.get(fasta.size()-1).sequence.append(line.toUpperCase());
 					}

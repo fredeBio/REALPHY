@@ -20,9 +20,9 @@ public class PerformBowtie {
 			if(!name.endsWith("R1.fastq.gz")){
 				runBowtie(core,cutSequences.get(i),out,bowtiepath,buildpath,runBowtie, seedLength,bowtieOptions);
 			}else{
-				File pair1=cutSequences.get(i);
+				String pair1=cutSequences.get(i).toString();
 				String newName=name.substring(0,name.length()-11)+"R2.fastq.gz";
-				File pair2=new File(cutSequences.get(i).getParent()+"/"+newName);
+				String pair2=cutSequences.get(i).getParent()+"/"+newName;
 				runBowtie(core, pair1, pair2, out, bowtiepath, buildpath, runBowtie, seedLength, bowtieOptions);
 			}
 			alignFiles.add(out);
@@ -106,13 +106,13 @@ public class PerformBowtie {
 		
 	}
 	
-	public static void runBowtie(File core,File pair1,File pair2,File out,String bowtiepath,String buildpath,boolean runBowtie,int seedLength,File bowtieOptions)throws RealphyException{
+	
+
+	public static void runBowtie(File core,String pair1,String pair2,File out,String bowtiepath,String buildpath,boolean runBowtie,int seedLength,File bowtieOptions)throws RealphyException{
 		String singlePair=" -1 "+pair1+" -2 "+pair2+" ";
 		runBowtieInternal(core, singlePair, out, bowtiepath, buildpath, runBowtie, seedLength, bowtieOptions);
 		
 	}
-
-	
 	public static boolean checkEmpty(File temp){
 		try{
 			BufferedReader br=new BufferedReader(new FileReader(temp));
