@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 public class RealPhy {
 	
-	static String version="v1.10";
+	static String version="v1.12";
 	
 	public static  final String fasExt[]=new String[]{"fas","fa","fasta","fna","fsa"};
 	public static final String gbkExt[]=new String[]{"gbk","gb"};

@@ -14,12 +14,18 @@ public class Arrays implements Serializable{
 	double[] cov;
 	HashMap<Integer,Integer>[] queryID;	
 	public final int length;
+	String ref;
 	public Arrays(int Length){
 		length=Length;
 		array=new double [length][10];
 		queryID=new HashMap[length];
 	}
-	
+	public Arrays(String ref){
+		length=ref.length()+1;
+		this.ref=ref;
+		array=new double [length][10];
+		queryID=new HashMap[length];
+	}
 	public void setCoverage(double[] Coverage){
 		cov=Coverage;
 	}
@@ -39,8 +45,15 @@ public class Arrays implements Serializable{
 //		else if(base.equalsIgnoreCase("GR") && pos<array.length)array[pos][7]++;
 //	}
 	
-	public void set(int pos,String base,double weight){
+	public void set(int pos,String base,double weight,String readSequence){
 		base=base.toUpperCase();
+		if(ref!=null){
+			char refb=ref.charAt(pos-1);
+			char refc=complement.get(refb);
+			if((refb+"F").equals(base)||(refc+"R").equals(base)){
+				throw new RuntimeException("Substitutions that are identical with the reference are not possible!\n"+readSequence+"\n"+pos+"\n"+base);
+			}
+		}
 		if(base.charAt(1)=='F'){
 			if(base.charAt(0)=='A' && pos<array.length){array[pos][0]+=weight;return;}
 			else if(base.charAt(0)=='T' && pos<array.length){array[pos][1]+=weight;return;}
@@ -82,7 +95,7 @@ public class Arrays implements Serializable{
 		}
 	}
 	public void set(int pos,String base,int readPos,double weight){
-		set(pos,base,weight);
+		set(pos,base,weight,"");
 		if(queryID[pos]==null){
 			HashMap<Integer,Integer> temp=new HashMap<Integer,Integer>();
 			temp.put(readPos,1);

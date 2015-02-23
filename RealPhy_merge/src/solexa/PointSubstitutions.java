@@ -32,7 +32,7 @@ public abstract class PointSubstitutions implements Serializable{
 		coverageNeg = initCoverage();
 		baseNames=initNames();
 		substitutions = initCoverage();
-		bases = initBases();
+		bases = initBases(fasta);
 		alignmentFile=AlignmentFile;
 		this.subInfo=subInfo;
 		read( quality,flank,fold);
@@ -71,6 +71,7 @@ public abstract class PointSubstitutions implements Serializable{
 		for(int i=1;i<pos.length;i++){
 			start=start+Integer.parseInt(pos[i-1])+1;
 			if(edit[i].charAt(0)=='^'){
+				start=start+edit[i].length()-2;
 			}else{
 				substitutionPos.add(start);
 				
@@ -118,7 +119,7 @@ public abstract class PointSubstitutions implements Serializable{
 		int subPosSize=substitutionPos.size();
 		int j=0;
 		for(int i=0;i<refDelSize&&j<subPosSize;i++){
-			if(refDeletion.get(i)<substitutionPos.get(j)){
+			if(refDeletion.get(i)<=substitutionPos.get(j)){
 				for(int k=j;k<subPosSize;k++){
 					substitutionPos.set(k,substitutionPos.get(k)+1);
 				}
@@ -139,7 +140,7 @@ public abstract class PointSubstitutions implements Serializable{
 		for(int i=1;i<length+1;i++){
 			//System.out.println(distances[i-1]+" "+editCodes[i]);
 			if(editCodes[i].equals("D")||editCodes[i].equals("P")){
-				start=start+Integer.parseInt(distances[i-1]);
+				//start=start+Integer.parseInt(distances[i-1]);
 			}else if(editCodes[i].equals("I")){
 				int deletions=Integer.parseInt(distances[i-1]);
 				for(int j=0;j<deletions;j++){
@@ -269,10 +270,11 @@ public abstract class PointSubstitutions implements Serializable{
 		return hm;
 	}
 	
-	public  HashMap<String,Arrays> initBases(){
+	public  HashMap<String,Arrays> initBases(HashMap<String,String> refs){
 		HashMap<String,Arrays> bases=new HashMap<String, Arrays>();
 		for(int i=0;i<alLength.size();i++){
-			bases.put(alName.get(i),new Arrays(alLength.get(i)+1));
+			//bases.put(alName.get(i),new Arrays(alLength.get(i)+1));
+			bases.put(alName.get(i),new Arrays(refs.get(alName.get(i))));
 		}
 		return bases;
 	}
@@ -526,14 +528,14 @@ public abstract class PointSubstitutions implements Serializable{
 					substitutions.get(geneId)[sub]+=weight;
 					if(!subInfo){
 						//System.out.println(sub+" "+base);
-						bases.get(geneId).set(sub, base,weight);
+						bases.get(geneId).set(sub, base,weight,readSequence);
 					}else{
 						int length=readSequence.length();
 						if(!bases.get(geneId).isset(sub)){
 							int subID=getQueryName(readID, mismatchRead, orientation,length);
 							bases.get(geneId).set(sub, base,subID,weight);
 						}else{
-							bases.get(geneId).set(sub, base,weight);
+							bases.get(geneId).set(sub, base,weight,readSequence);
 						}
 
 					}
@@ -568,14 +570,14 @@ public abstract class PointSubstitutions implements Serializable{
 			 if (lengthSeq > sub){
 				 substitutions.get(fastaId)[sub]+=weight;
 				 if(!subInfo){
-					 bases.get(fastaId).set(sub, base,weight);
+					 bases.get(fastaId).set(sub, base,weight,"");
 				 }else{
 					 int length=readSequence.length();
 					 if(!bases.get(fastaId).isset(sub)){
 						 int subID=getQueryName(readID, mismatchRead, orientation,length);
 						 bases.get(fastaId).set(sub, base,subID,weight);
 					 }else{
-						 bases.get(fastaId).set(sub, base,weight);
+						 bases.get(fastaId).set(sub, base,weight,"");
 					 }
 				 }
 

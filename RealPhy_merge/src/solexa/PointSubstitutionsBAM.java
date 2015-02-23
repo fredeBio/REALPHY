@@ -34,6 +34,8 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 		}else{
 			posMismatchesRead=posMismatchesRef;
 		}
+		
+		
 		setSubstitutions( posMismatchesRead, posMismatchesRef, sequence, readID, qualityString, orientation, posorig, flank, quality, fastaId, subInfo,weight);
 	}
 	
@@ -179,6 +181,7 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 						if(AS==ASnext||readPair)sams.add(srnext);
 						sr=srnext;
 					}
+					
 					analyseAll(sams,quality,flank);
 					
 						
