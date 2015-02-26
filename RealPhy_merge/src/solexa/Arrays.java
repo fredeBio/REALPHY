@@ -49,9 +49,11 @@ public class Arrays implements Serializable{
 		base=base.toUpperCase();
 		if(ref!=null){
 			char refb=ref.charAt(pos-1);
-			char refc=complement.get(refb);
-			if((refb+"F").equals(base)||(refc+"R").equals(base)){
-				throw new RuntimeException("Substitutions that are identical with the reference are not possible!\n"+readSequence+"\n"+pos+"\n"+base);
+			if(complement.containsKey(refb)){
+				char refc=complement.get(refb);
+				if((refb+"F").equals(base)||(refc+"R").equals(base)){
+					throw new RuntimeException("Substitutions that are identical with the reference are not possible!\n"+readSequence+"\n"+pos+"\n"+base);
+				}
 			}
 		}
 		if(base.charAt(1)=='F'){
