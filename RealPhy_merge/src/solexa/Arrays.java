@@ -52,7 +52,7 @@ public class Arrays implements Serializable{
 			if(complement.containsKey(refb)){
 				char refc=complement.get(refb);
 				if((refb+"F").equals(base)||(refc+"R").equals(base)){
-					throw new RuntimeException("Substitutions that are identical with the reference are not possible!\n"+readSequence+"\n"+pos+"\n"+base);
+					throw new RuntimeException("Substitutions that are identical with the reference are not possible!\n"+readSequence+"\n"+pos+"\n"+base+"\n"+ref);
 				}
 			}
 		}
@@ -96,8 +96,8 @@ public class Arrays implements Serializable{
 			}
 		}
 	}
-	public void set(int pos,String base,int readPos,double weight){
-		set(pos,base,weight,"");
+	public void set(int pos,String base,int readPos,double weight,String readSeq){
+		set(pos,base,weight,readSeq);
 		if(queryID[pos]==null){
 			HashMap<Integer,Integer> temp=new HashMap<Integer,Integer>();
 			temp.put(readPos,1);

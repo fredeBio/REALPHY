@@ -17,7 +17,7 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 	public static void main(String args[]){
 		File refseq=new File("/home/frederic/Basel/randomAlignments/test/test2/sequences/S21.fas");
 		PointSubstitutionsBAM pss=new PointSubstitutionsBAM(refseq, 0, new File("/home/frederic/Basel/randomAlignments/test/test2/S21/alignOut_NoGenes/S12_50fasta.bam"), 20, false);
-		pss.writeArray(0.0, refseq, new File("/home/frederic/Basel/randomAlignments/test/test2/S21/alignOut_NoGenes/"), 0);
+		pss.writeArray(0.0, refseq, new File("/home/frederic/Basel/randomAlignments/test/test2/S21/alignOut_NoGenes/"));
 		
 	}
 	
@@ -100,9 +100,9 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 					gap=false;
 				}
 				if(regionsRef.charAt(i)=='m'){
-					setCoverageSingle(pos, readPos, fastaId, sequence,qualityString, quality, orientation, subInfo, readID,weight,gap,flank);
+					setCoverageSingle(pos, readPos, fastaId, sequence,qualityString, quality, orientation, subInfo, readID,weight,gap);
 					if(gap){
-						setGap(sequence, readPos, pos-posorig, readID, orientation, posorig, flank, fastaId, subInfo, weight);
+						setGap(sequence, readPos, pos-posorig, readID, orientation, posorig, fastaId, subInfo, weight);
 					}
 					pos++;
 				}
@@ -116,9 +116,9 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 					gap=false;
 				}
 				if(regionsRef.charAt(i)=='m'){
-					setCoverageSingle(pos, readPos, fastaId, sequence,qualityString, quality, orientation, subInfo, readID,weight,gap,flank);
+					setCoverageSingle(pos, readPos, fastaId, sequence,qualityString, quality, orientation, subInfo, readID,weight,gap);
 					if(gap){
-						setGap(sequence, readPos, pos-posorig, readID, orientation, posorig, flank, fastaId, subInfo, weight);
+						setGap(sequence, readPos, pos-posorig, readID, orientation, posorig, fastaId, subInfo, weight);
 					}
 					pos++;
 					
@@ -135,7 +135,7 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 			int mismatchRead=posMismatchesRead.get(j)-1;
 			int mismatchRef=posMismatchesRef.get(j)-1;
 			
-			setSubstitution(sequence, mismatchRead,mismatchRef, readID, qualityString, orientation, posorig, flank, quality, fastaId,  subInfo,weight);
+			setSubstitution(sequence, mismatchRead,mismatchRef, readID, qualityString, orientation, posorig, quality, fastaId,  subInfo,weight);
 
 		}
 	}
@@ -145,7 +145,7 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 			int gapRead=posGapsRead.get(j);
 			int gapRef=posGapsRef.get(j);
 
-			setGap(sequence,gapRead,gapRef, readID, orientation, posorig, flank, fastaId,  subInfo,weight);
+			setGap(sequence,gapRead,gapRef, readID, orientation, posorig, fastaId,  subInfo,weight);
 
 		}
 	}
@@ -158,7 +158,7 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 			this(RefSeq,flank,AlignmentFile,quality,1,subInfo);
 		}
 		@Override
-		void read(int quality, int flank, int fold) {
+		void read(int quality, int fold) {
 				SAMFileReader sfr=new SAMFileReader(alignmentFile,  true);
 
 				SAMRecordIterator sri=sfr.iterator();

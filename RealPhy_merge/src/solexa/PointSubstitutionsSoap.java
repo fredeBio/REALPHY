@@ -25,7 +25,7 @@ public class PointSubstitutionsSoap extends PointSubstitutions implements Serial
 		PointSubstitutionsSoap PS=new PointSubstitutionsSoap(RefSeq, flank, soap, quality,false);
 		
 
-		PS.writeArray( threshold,  RefSeq, outDir,flank);
+		PS.writeArray( threshold,  RefSeq, outDir);
 
 	}
 	
@@ -34,7 +34,7 @@ public class PointSubstitutionsSoap extends PointSubstitutions implements Serial
 	
 
 	
-	 void read( int quality,int flank,int fold) {
+	 void read( int quality,int fold) {
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(alignmentFile));
 			String line = "";
@@ -74,7 +74,7 @@ public class PointSubstitutionsSoap extends PointSubstitutions implements Serial
 
 					 int readSubPos=Integer.parseInt(split[1]);
 
-					 setSubstitution(sequence, readSubPos,readSubPos, readID, qualityString, orientation, posorig, flank, quality, fastaId,  subInfo,1.0);
+					 setSubstitution(sequence, readSubPos,readSubPos, readID, qualityString, orientation, posorig, quality, fastaId,  subInfo,1.0);
 
 				}
 				//System.exit(1);

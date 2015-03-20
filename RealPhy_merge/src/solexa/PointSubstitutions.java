@@ -26,7 +26,8 @@ public abstract class PointSubstitutions implements Serializable{
 	}
 	public PointSubstitutions(File RefSeq,int flank,File AlignmentFile,int quality,int fold,boolean subInfo){
 		//readSeq(RefSeq, flank);
-		fasta=readFasta(RefSeq,flank);
+		this.flank=flank;
+		fasta=readFasta(RefSeq);
 		coverage = initCoverage();
 		coveragePos = initCoverage();
 		coverageNeg = initCoverage();
@@ -35,7 +36,7 @@ public abstract class PointSubstitutions implements Serializable{
 		bases = initBases(fasta);
 		alignmentFile=AlignmentFile;
 		this.subInfo=subInfo;
-		read( quality,flank,fold);
+		read( quality,fold);
 		for(int i=0;i<alName.size();i++){
 			bases.get(alName.get(i)).setCoverage(coverage.get(alName.get(i)));
 		}
@@ -43,7 +44,7 @@ public abstract class PointSubstitutions implements Serializable{
 		setfractionCoverage();
 	}
 	//needs to call setCoverage and setSubstitutions
-	abstract void read(int quality,int flank,int fold);
+	abstract void read(int quality,int fold);
 	
 	
 	
@@ -62,6 +63,7 @@ public abstract class PointSubstitutions implements Serializable{
 	HashMap<String,Double> fractionCov=new HashMap<String,Double>();
 	File alignmentFile;
 	boolean subInfo=false;
+	int flank; 
 	
 	public static ArrayList<Integer> getMismatchesRef(String mismatch){
 		String pos[]=mismatch.split("[^0-9]+");
@@ -258,7 +260,7 @@ public abstract class PointSubstitutions implements Serializable{
 		
 	}
 	
-	public HashMap<String,String> readFasta(File in,int flank){
+	public HashMap<String,String> readFasta(File in){
  		ArrayList<Fasta> fas=Fasta.readFasta(in);
 		HashMap<String,String> hm=Fasta.fasToHash(fas,false);
 		int size=fas.size();
@@ -274,7 +276,9 @@ public abstract class PointSubstitutions implements Serializable{
 		HashMap<String,Arrays> bases=new HashMap<String, Arrays>();
 		for(int i=0;i<alLength.size();i++){
 			//bases.put(alName.get(i),new Arrays(alLength.get(i)+1));
-			bases.put(alName.get(i),new Arrays(refs.get(alName.get(i))));
+			String ref=refs.get(alName.get(i));
+			ref=ref.substring(flank,ref.length()-flank);
+			bases.put(alName.get(i),new Arrays(ref));
 		}
 		return bases;
 	}
@@ -332,7 +336,7 @@ public abstract class PointSubstitutions implements Serializable{
 		return countArray;
 	}
 	
-	public void writeArray( double threshold, File refseq, File outDir,int flank) {
+	public void writeArray( double threshold, File refseq, File outDir) {
 		try {
 			
 			BufferedWriter bwCov=new BufferedWriter(new FileWriter(new File(outDir+"/coverage.out")));
@@ -518,9 +522,10 @@ public abstract class PointSubstitutions implements Serializable{
 	}
 	
 
-	 void setSubstitution(String readSequence,int mismatchRead,int mismatchRef,String readID,String qualityString,char orientation,int posorig,int flank,int quality,String geneId,boolean subInfo,double weight){
+	 void setSubstitution(String readSequence,int mismatchRead,int mismatchRef,String readID,String qualityString,char orientation,int posorig,int quality,String geneId,boolean subInfo,double weight){
 		int lengthSeq=substitutions.get(geneId).length;
 		int sub = posorig+mismatchRef-flank;
+		
 		if(sub>0&& sub<lengthSeq){
 			if((int)(qualityString.charAt(mismatchRead))-33>=quality){
 				String base = orientation=='+'?readSequence.charAt(mismatchRead)+"F":DNAmanipulations.reverse(readSequence.charAt(mismatchRead)+"")+"R";
@@ -533,7 +538,7 @@ public abstract class PointSubstitutions implements Serializable{
 						int length=readSequence.length();
 						if(!bases.get(geneId).isset(sub)){
 							int subID=getQueryName(readID, mismatchRead, orientation,length);
-							bases.get(geneId).set(sub, base,subID,weight);
+							bases.get(geneId).set(sub, base,subID,weight,readSequence);
 						}else{
 							bases.get(geneId).set(sub, base,weight,readSequence);
 						}
@@ -562,7 +567,7 @@ public abstract class PointSubstitutions implements Serializable{
 	  * @param subInfo
 	  * @param weight
 	  */
-	 void setGap(String readSequence,int mismatchRead,int mismatchRef,String readID,char orientation,int posorig,int flank,String fastaId,boolean subInfo,double weight){
+	 void setGap(String readSequence,int mismatchRead,int mismatchRef,String readID,char orientation,int posorig,String fastaId,boolean subInfo,double weight){
 		 int lengthSeq=substitutions.get(fastaId).length;
 		 int sub = posorig+mismatchRef-flank;
 		 if(sub>0&& sub<lengthSeq){
@@ -575,7 +580,7 @@ public abstract class PointSubstitutions implements Serializable{
 					 int length=readSequence.length();
 					 if(!bases.get(fastaId).isset(sub)){
 						 int subID=getQueryName(readID, mismatchRead, orientation,length);
-						 bases.get(fastaId).set(sub, base,subID,weight);
+						 bases.get(fastaId).set(sub, base,subID,weight,readSequence);
 					 }else{
 						 bases.get(fastaId).set(sub, base,weight,"");
 					 }
@@ -629,7 +634,7 @@ public abstract class PointSubstitutions implements Serializable{
 	  * @param weight
 	  * @param gap
 	  */
-	 void setCoverageSingle(int pos,int readPos,String fastaId,String sequence,String qualityString,int quality,char orientation,boolean subInfo,String readID, double weight,boolean gap,int flank){
+	 void setCoverageSingle(int pos,int readPos,String fastaId,String sequence,String qualityString,int quality,char orientation,boolean subInfo,String readID, double weight,boolean gap){
 		int lengthSeq=	coverage.get(fastaId).length;
 		double[] cov=coverage.get(fastaId);
 		double[] covPos=coveragePos.get(fastaId);
