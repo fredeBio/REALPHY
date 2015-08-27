@@ -522,10 +522,10 @@ public abstract class PointSubstitutions implements Serializable{
 	}
 	
 
-	 void setSubstitution(String readSequence,int mismatchRead,int mismatchRef,String readID,String qualityString,char orientation,int posorig,int quality,String geneId,boolean subInfo,double weight){
+	 double setSubstitution(String readSequence,int mismatchRead,int mismatchRef,String readID,String qualityString,char orientation,int posorig,int quality,String geneId,boolean subInfo,double weight){
 		int lengthSeq=substitutions.get(geneId).length;
 		int sub = posorig+mismatchRef-flank;
-		
+		double ret=0;
 		if(sub>0&& sub<lengthSeq){
 			if((int)(qualityString.charAt(mismatchRead))-33>=quality){
 				String base = orientation=='+'?readSequence.charAt(mismatchRead)+"F":DNAmanipulations.reverse(readSequence.charAt(mismatchRead)+"")+"R";
@@ -539,6 +539,7 @@ public abstract class PointSubstitutions implements Serializable{
 						if(!bases.get(geneId).isset(sub)){
 							int subID=getQueryName(readID, mismatchRead, orientation,length);
 							bases.get(geneId).set(sub, base,subID,weight,readSequence);
+							if(sub==9528)ret=weight;
 						}else{
 							bases.get(geneId).set(sub, base,weight,readSequence);
 						}
@@ -548,6 +549,7 @@ public abstract class PointSubstitutions implements Serializable{
 				}
 			}
 		}
+		return ret;
 
 	}
 	 
@@ -594,8 +596,9 @@ public abstract class PointSubstitutions implements Serializable{
 	  * 
 	  */
 	 
-	 void setCoverage(int pos,int length,String fastaId,String sequence,String qualityString,int quality,char orientation,boolean subInfo,String readID, double weight){
-		int lengthSeq=	coverage.get(fastaId).length;
+	 double setCoverage(int pos,int length,String fastaId,String sequence,String qualityString,int quality,char orientation,boolean subInfo,String readID, double weight){
+		double ret=0;
+		 int lengthSeq=	coverage.get(fastaId).length;
 		double[] cov=coverage.get(fastaId);
 		double[] covPos=coveragePos.get(fastaId);
 		double[] covNeg=coverageNeg.get(fastaId);
@@ -604,7 +607,7 @@ public abstract class PointSubstitutions implements Serializable{
 			 int subpos=i-pos;
 			 if (i>0&&lengthSeq > i &&qualityString.charAt(subpos)-33>=quality){
 				 cov[i]+=weight;
-
+				 if(i==9528)ret=weight;
 				 if(orientation=='+'){
 					 covPos[i]+=weight;
 				 }else{
@@ -617,7 +620,7 @@ public abstract class PointSubstitutions implements Serializable{
 
 			 }
 		 }
-		 
+		 return ret;
 	 }
 	 /**
 	  * Sets the coverage for a single genome position and if gap is set to false then it also sets the name for that position.

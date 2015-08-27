@@ -21,8 +21,7 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 		
 	}
 	
-	public void setSubstitution(String MD,String cigar,String sequence,String readID,String qualityString,char orientation,int posorig,int flank,int quality,String fastaId,boolean subInfo,double weight){
-
+	public double setSubstitution(String MD,String cigar,String sequence,String readID,String qualityString,char orientation,int posorig,int flank,int quality,String fastaId,boolean subInfo,double weight){
 		ArrayList<Integer> posMismatchesRef=getMismatchesRef(MD);
 		ArrayList<Integer> posMismatchesRead;
 		if(cigar.contains("I")){
@@ -36,7 +35,7 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 		}
 		
 		
-		setSubstitutions( posMismatchesRead, posMismatchesRef, sequence, readID, qualityString, orientation, posorig, flank, quality, fastaId, subInfo,weight);
+		return setSubstitutions( posMismatchesRead, posMismatchesRef, sequence, readID, qualityString, orientation, posorig, flank, quality, fastaId, subInfo,weight);
 	}
 	
 	public void setGaps(String cigar,String sequence,String readID,char orientation,int posorig,int flank,String fastaId,boolean subinfo,double weight){
@@ -87,8 +86,8 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 		return gapsPos;
 	}
 	
-	public void setCoverageCigar(StringBuffer regionsRef,StringBuffer regionsRead,int length,int pos,String fastaId,String sequence,String qualityString,int quality,char orientation,boolean subInfo,String readID,double weight,int flank){
-
+	public double setCoverageCigar(StringBuffer regionsRef,StringBuffer regionsRead,int length,int pos,String fastaId,String sequence,String qualityString,int quality,char orientation,boolean subInfo,String readID,double weight,int flank){
+		double ret=0;
 		int size=regionsRef.length();
 		int readPos=-1;
 		int posorig=pos;
@@ -101,6 +100,10 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 				}
 				if(regionsRef.charAt(i)=='m'){
 					setCoverageSingle(pos, readPos, fastaId, sequence,qualityString, quality, orientation, subInfo, readID,weight,gap);
+					//TEST !!!
+					if(pos==9528)ret=weight;
+					//TEST
+
 					if(gap){
 						setGap(sequence, readPos, pos-posorig, readID, orientation, posorig, fastaId, subInfo, weight);
 					}
@@ -117,6 +120,9 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 				}
 				if(regionsRef.charAt(i)=='m'){
 					setCoverageSingle(pos, readPos, fastaId, sequence,qualityString, quality, orientation, subInfo, readID,weight,gap);
+					//TEST !!!
+					if(pos==9528)ret=weight;
+					//TEST
 					if(gap){
 						setGap(sequence, readPos, pos-posorig, readID, orientation, posorig, fastaId, subInfo, weight);
 					}
@@ -127,17 +133,21 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 				gap=true;
 			} 
 		}
-
+		return ret;
 	}
 	
-	public void setSubstitutions(ArrayList<Integer> posMismatchesRead,ArrayList<Integer> posMismatchesRef,String sequence,String readID,String qualityString,char orientation,int posorig,int flank,int quality,String fastaId,boolean subInfo, double weight){
+	public double setSubstitutions(ArrayList<Integer> posMismatchesRead,ArrayList<Integer> posMismatchesRef,String sequence,String readID,String qualityString,char orientation,int posorig,int flank,int quality,String fastaId,boolean subInfo, double weight){
+		double ret=0;
 		for(int j=0;j<posMismatchesRead.size();j++){
 			int mismatchRead=posMismatchesRead.get(j)-1;
 			int mismatchRef=posMismatchesRef.get(j)-1;
-			
-			setSubstitution(sequence, mismatchRead,mismatchRef, readID, qualityString, orientation, posorig, quality, fastaId,  subInfo,weight);
-
+			double t=0;
+			t=setSubstitution(sequence, mismatchRead,mismatchRef, readID, qualityString, orientation, posorig, quality, fastaId,  subInfo,weight);
+			if(t!=0){
+				ret=t;
+			}
 		}
+		return ret;
 	}
 
 	public void setGaps(ArrayList<Integer> posGapsRead,ArrayList<Integer> posGapsRef,String sequence,String readID,char orientation,int posorig,int flank,String fastaId,boolean subInfo, double weight){
@@ -236,13 +246,15 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 			
 			getMatchRegionsCigar(cigar,regionsRead,regionsRef);
 			//System.out.println(sr);
+			double c;
 			if(!cigar.equals(length+"M")){
-				setCoverageCigar(regionsRef,regionsRead, length, pos, fastaId, sequence, qualityString, quality, orientation, subInfo, readID,weight,flank);
+				c=setCoverageCigar(regionsRef,regionsRead, length, pos, fastaId, sequence, qualityString, quality, orientation, subInfo, readID,weight,flank);
 			}else{
-				setCoverage(pos, length, fastaId, sequence,qualityString, quality, orientation, subInfo, readID,weight);
+				c=setCoverage(pos, length, fastaId, sequence,qualityString, quality, orientation, subInfo, readID,weight);
 
 			}
 			//setGaps(cigar,sequence,readID,orientation,posorig,flank,fastaId,subInfo,weight);
+			double ss=0;
 			if(XM!=null&&(Integer)XM>0){
 				Object MD=sr.getAttribute("MD");
 
@@ -250,6 +262,10 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 				//System.out.println(MD.toString()+" "+ cigar+" "+ sequence+" "+ readID+" "+ qualityString+" "+ orientation+" "+ posorig+" "+ flank+" "+ quality+" "+ fastaId+" "+ subInfo);
 				setSubstitution(MD.toString(), cigar, sequence, readID, qualityString, orientation, posorig, flank, quality, fastaId, subInfo,weight);
 			}
+//			if(c!=ss){
+//				System.err.println(c+" "+ss+" "+sequence);
+//				System.exit(-1);
+//			}
 		}
 
 		
