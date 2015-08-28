@@ -191,7 +191,13 @@ public class RealPhy {
 	}
 	public RealPhy(String[] args){
 		initDefault();
-		setVariables(args);
+		try{
+			setVariables(args);
+		}catch(RealphyException e){
+			e.printStackTrace();
+			writeErrorFile(e.getMessage());
+			System.exit(-1);
+		}
 		checkQuiet();
 		checkSequenceFiles();
 		aligner=(Integer)arguments.get("aligner");
@@ -807,7 +813,7 @@ public class RealPhy {
 	
 
 	
-	private void setVariables(String[] args){
+	private void setVariables(String[] args) throws RealphyException{
 		sequenceFolder=new File(args[0]);
 		masterOutFolder=new File(args[1]);
 		cutFolder=new File(sequenceFolder+"/cut/");
@@ -815,8 +821,7 @@ public class RealPhy {
 		while(i<args.length){
 			int add=0;	
 			if(!args[i].startsWith("-")){
-				System.err.println("Arguments have to start with \"-\". Violating argument: "+args[i]+".");
-				System.exit(-1);
+				throw new RealphyException("Arguments have to start with \"-\". Violating argument: "+args[i]+".");
 			}else{
 				String arg=args[i].substring(1);
 				if(novalueArgs.containsKey(arg)){
@@ -826,8 +831,8 @@ public class RealPhy {
 						arguments.put(arg, o);
 
 					}else{
-						System.err.println("Invalid value \""+args[i+1]+"\" for argument -"+arg+".");
-						System.exit(-1);
+						throw new RealphyException("Invalid value \""+args[i+1]+"\" for argument -"+arg+".");
+
 					}
 				}else{
 					add=2;
@@ -836,8 +841,7 @@ public class RealPhy {
 						arguments.put(arg, o);
 
 					}else{
-						System.err.println("Invalid value \""+args[i+1]+"\" for argument -"+arg+".");
-						System.exit(-1);
+						throw new RealphyException("Invalid value \""+args[i+1]+"\" for argument -"+arg+".");
 					}
 				}
 			}
