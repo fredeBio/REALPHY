@@ -1,4 +1,4 @@
-This is a link to the official <a href="http://realphy.unibas.ch/fcgi/realphy"> REALPHY website</a>.
+This is a link to the official <a href="http://realphy.unibas.ch/realphy"> REALPHY website</a>.
 
 The manual for REALPHY is available <a href=http://realphy.unibas.ch/docs/Realphy_manual.pdf> here</a>.
 # The terms of use
