@@ -64,6 +64,7 @@ public abstract class PointSubstitutions implements Serializable{
 	File alignmentFile;
 	boolean subInfo=false;
 	int flank; 
+	int minQuality = 33;
 	
 	public static ArrayList<Integer> getMismatchesRef(String mismatch){
 		String pos[]=mismatch.split("[^0-9]+");
@@ -182,6 +183,11 @@ public abstract class PointSubstitutions implements Serializable{
 					read.append('m');
 					ref.append('g');
 				}
+			//skip region in read
+			}else if(editCodes[i].equals("S")){
+				for(int j=0;j<dist;j++){
+					read.append('s');
+				}
 			}else{
 			// if there is a deletion both in the read and the reference do nothing
 			}
@@ -196,6 +202,25 @@ public abstract class PointSubstitutions implements Serializable{
 	public Arrays getBases(String id){
 		return bases.get(id);
 	}
+	
+	private Arrays applyMinReads(Arrays a,double minFreq){
+		for(int i=0;i<a.array.length;i++){
+			for(int j=0;j<a.array[i].length;j++){
+				if(a.array[i][j]/a.cov[i]<minFreq){
+					double temp=a.array[i][j];
+					a.cov[i]=a.cov[i]-temp;
+					a.array[i][j]=0;
+				}
+			}
+		}
+		return a;
+	}
+	
+	public Arrays getBases(String id,double minFreq){
+		return applyMinReads(bases.get(id),minFreq);
+		
+	}
+	
 	public HashMap<String,double[]> getCoverage(){
 		return coverage;
 	}
@@ -527,7 +552,7 @@ public abstract class PointSubstitutions implements Serializable{
 		int sub = posorig+mismatchRef-flank;
 		double ret=0;
 		if(sub>0&& sub<lengthSeq){
-			if((int)(qualityString.charAt(mismatchRead))-33>=quality){
+			if((int)(qualityString.charAt(mismatchRead))-minQuality>=quality){
 				String base = orientation=='+'?readSequence.charAt(mismatchRead)+"F":DNAmanipulations.reverse(readSequence.charAt(mismatchRead)+"")+"R";
 				if (lengthSeq > sub){
 					substitutions.get(geneId)[sub]+=weight;
@@ -539,7 +564,6 @@ public abstract class PointSubstitutions implements Serializable{
 						if(!bases.get(geneId).isset(sub)){
 							int subID=getQueryName(readID, mismatchRead, orientation,length);
 							bases.get(geneId).set(sub, base,subID,weight,readSequence);
-							if(sub==9528)ret=weight;
 						}else{
 							bases.get(geneId).set(sub, base,weight,readSequence);
 						}
@@ -605,7 +629,7 @@ public abstract class PointSubstitutions implements Serializable{
 		//System.out.println(readID+" "+pos+" "+length);
 		 for (int i = pos; i < pos + length && i<lengthSeq; i++) {
 			 int subpos=i-pos;
-			 if (i>0&&lengthSeq > i &&qualityString.charAt(subpos)-33>=quality){
+			 if (i>0&&lengthSeq > i &&qualityString.charAt(subpos)-minQuality>=quality){
 				 cov[i]+=weight;
 				 if(i==9528)ret=weight;
 				 if(orientation=='+'){
@@ -644,7 +668,7 @@ public abstract class PointSubstitutions implements Serializable{
 		double[] covNeg=coverageNeg.get(fastaId);
 		int subpos=readPos;
 		int sub=pos-flank;
-		if (sub>=0&&lengthSeq > sub &&qualityString.charAt(subpos)-33>=quality){
+		if (sub>=0&&lengthSeq > sub &&qualityString.charAt(subpos)-minQuality>=quality){
 			cov[sub]+=weight;
 
 			if(orientation=='+'){

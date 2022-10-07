@@ -38,6 +38,8 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 		return setSubstitutions( posMismatchesRead, posMismatchesRef, sequence, readID, qualityString, orientation, posorig, flank, quality, fastaId, subInfo,weight);
 	}
 	
+	
+	
 	public void setGaps(String cigar,String sequence,String readID,char orientation,int posorig,int flank,String fastaId,boolean subinfo,double weight){
 		ArrayList<Integer> gapsRead=getGapsRead(cigar);
 		ArrayList<Integer> gapsRef=getGapsRef(cigar,orientation);
@@ -94,15 +96,18 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 		boolean gap=true;
 		if(orientation=='+'){
 			for(int i=0;i<size;i++){
+				while(regionsRead.charAt(i)=='s'){
+					readPos++;
+					regionsRead.deleteCharAt(i);
+				}
+				
 				if(regionsRead.charAt(i)=='m'){
 					readPos++;
 					gap=false;
 				}
 				if(regionsRef.charAt(i)=='m'){
 					setCoverageSingle(pos, readPos, fastaId, sequence,qualityString, quality, orientation, subInfo, readID,weight,gap);
-					//TEST !!!
-					if(pos==9528)ret=weight;
-					//TEST
+					
 
 					if(gap){
 						setGap(sequence, readPos, pos-posorig, readID, orientation, posorig, fastaId, subInfo, weight);
@@ -113,16 +118,20 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 				gap=true;
 			} 
 		}else{
+			deleteSFromBeginning(regionsRead);
 			for(int i=size-1;i>=0;i--){
+				while(regionsRead.charAt(regionsRead.length()-1)=='s'){
+					readPos++;
+					regionsRead.deleteCharAt(regionsRead.length()-1);
+				}
+				
 				if(regionsRead.charAt(i)=='m'){
 					readPos++;
 					gap=false;
 				}
 				if(regionsRef.charAt(i)=='m'){
 					setCoverageSingle(pos, readPos, fastaId, sequence,qualityString, quality, orientation, subInfo, readID,weight,gap);
-					//TEST !!!
-					if(pos==9528)ret=weight;
-					//TEST
+					
 					if(gap){
 						setGap(sequence, readPos, pos-posorig, readID, orientation, posorig, fastaId, subInfo, weight);
 					}
@@ -134,6 +143,12 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 			} 
 		}
 		return ret;
+	}
+	
+	private void deleteSFromBeginning(StringBuffer s){
+		while(s.charAt(0)=='s'){
+			s.deleteCharAt(0);
+		}
 	}
 	
 	public double setSubstitutions(ArrayList<Integer> posMismatchesRead,ArrayList<Integer> posMismatchesRef,String sequence,String readID,String qualityString,char orientation,int posorig,int flank,int quality,String fastaId,boolean subInfo, double weight){
@@ -176,6 +191,7 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 				
 				double p=1.0/fold;
 				SAMRecord srnext=null;
+				
 				while (sri.hasNext()) {
 					if(p<1&&Math.random()>p){
 						sri.next();	
@@ -184,14 +200,17 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 					ArrayList<SAMRecord> sams=new ArrayList<SAMRecord>();
 					sams.add(srnext!=null?srnext:(srnext=sri.next()));
 					SAMRecord sr=srnext;
-					int AS=(Integer)sr.getAttribute("AS");
-					while(sri.hasNext()&&sr.getReadName().equals((srnext=sri.next()).getReadName())){//&&srnext.getFlags()>=256){
-						int ASnext=(Integer)srnext.getAttribute("AS");
-						boolean readPair=sr.getReadPairedFlag()&&sr.getFirstOfPairFlag()&&srnext.getSecondOfPairFlag();
-						if(AS==ASnext||readPair)sams.add(srnext);
-						sr=srnext;
+					if(sr.getAttribute("AS")!=null){
+						int AS=(Integer)sr.getAttribute("AS");
+						while(sri.hasNext()&&sr.getReadName().equals((srnext=sri.next()).getReadName())){//&&srnext.getFlags()>=256){
+							int ASnext=(Integer)srnext.getAttribute("AS");
+							boolean readPair=sr.getReadPairedFlag()&&sr.getFirstOfPairFlag()&&srnext.getSecondOfPairFlag();
+							if(AS==ASnext||readPair)sams.add(srnext);
+							sr=srnext;
+						}
+					}else{
+						srnext=sri.next();
 					}
-					
 					analyseAll(sams,quality,flank);
 					
 						
@@ -247,6 +266,7 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 			getMatchRegionsCigar(cigar,regionsRead,regionsRef);
 			//System.out.println(sr);
 			double c;
+			StringBuffer MDgen=new StringBuffer();
 			if(!cigar.equals(length+"M")){
 				c=setCoverageCigar(regionsRef,regionsRead, length, pos, fastaId, sequence, qualityString, quality, orientation, subInfo, readID,weight,flank);
 			}else{
@@ -254,13 +274,14 @@ public class PointSubstitutionsBAM extends PointSubstitutions {
 
 			}
 			//setGaps(cigar,sequence,readID,orientation,posorig,flank,fastaId,subInfo,weight);
-			double ss=0;
-			if(XM!=null&&(Integer)XM>0){
+			if(XM!=null&&(Integer)XM>0||(sr.getAttribute("RG")!=null&&sr.getAttribute("RG").equals("Unpaired_reads_assembled_against_NL43_ann_wk0virusPassRef"))){
 				Object MD=sr.getAttribute("MD");
 
 				//System.out.println(MD);
 				//System.out.println(MD.toString()+" "+ cigar+" "+ sequence+" "+ readID+" "+ qualityString+" "+ orientation+" "+ posorig+" "+ flank+" "+ quality+" "+ fastaId+" "+ subInfo);
-				setSubstitution(MD.toString(), cigar, sequence, readID, qualityString, orientation, posorig, flank, quality, fastaId, subInfo,weight);
+				if(MD!=null){
+					setSubstitution(MD.toString(), cigar, sequence, readID, qualityString, orientation, posorig, flank, quality, fastaId, subInfo,weight);
+				}
 			}
 //			if(c!=ss){
 //				System.err.println(c+" "+ss+" "+sequence);

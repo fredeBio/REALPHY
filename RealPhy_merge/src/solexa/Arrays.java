@@ -45,17 +45,9 @@ public class Arrays implements Serializable{
 //		else if(base.equalsIgnoreCase("GR") && pos<array.length)array[pos][7]++;
 //	}
 	
-	public void set(int pos,String base,double weight,String readSequence){
-		base=base.toUpperCase();
-		if(ref!=null){
-			char refb=ref.charAt(pos-1);
-			if(complement.containsKey(refb)){
-				char refc=complement.get(refb);
-				if((refb+"F").equals(base)||(refc+"R").equals(base)){
-					throw new RuntimeException("Substitutions that are identical with the reference are not possible!\n"+readSequence+"\n"+pos+"\n"+base+"\n"+ref);
-				}
-			}
-		}
+	
+	public void set(int pos,String base,double weight){
+		
 		if(base.charAt(1)=='F'){
 			if(base.charAt(0)=='A' && pos<array.length){array[pos][0]+=weight;return;}
 			else if(base.charAt(0)=='T' && pos<array.length){array[pos][1]+=weight;return;}
@@ -73,6 +65,20 @@ public class Arrays implements Serializable{
 		}
 		//System.err.println("Do not recognize "+ base+"!");
 		
+	}
+	
+	public void set(int pos,String base,double weight,String readSequence){
+		base=base.toUpperCase();
+		if(ref!=null){
+			char refb=ref.charAt(pos-1);
+			if(complement.containsKey(refb)){
+				char refc=complement.get(refb);
+				if((refb+"F").equals(base)||(refc+"R").equals(base)){
+					throw new RuntimeException("Substitutions that are identical with the reference are not possible!\n"+readSequence+"\n"+pos+"\n"+base+"\n"+ref);
+				}
+			}
+		}
+		set(pos,base,weight);
 	}
 	public static String[] bases=new String[]{"AF","TF","CF","GF","-F","AR","TR","CR","GR","-R"};
 
