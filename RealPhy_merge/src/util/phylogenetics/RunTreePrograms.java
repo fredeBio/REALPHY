@@ -37,7 +37,28 @@ public class RunTreePrograms {
 		String PhyMLcom=phymlPath+" -i "+in+model+seedString+" "+paraLine+bootstrap;
 		
 		runProgram(PhyMLcom,"",outFolder);
-}
+    }
+
+    public static void runIQTree(File in,File IQTreePath,File parameters,int seed, int threadNum){
+		File outFolder=new File(in.getParent());
+		if(!IQTreePath.exists()){
+			System.err.println("Cannot find iqtree executable. Not building tree. Exiting.");
+			System.exit(-1);
+		}		
+
+		String IQTreecom=IQTreePath+" -m GTR -T "+threadNum+" -s "+in;
+		//  iqtree -s polymorphisms_move.phy -m GTR -T 3
+		runProgram(IQTreecom,"",outFolder);
+		File treefile=new File(outFolder+"/polymorphisms_move.phy.treefile");
+		File treefileCopy=new File(outFolder+"/polymorphisms_move.phy_phyml_tree.txt");
+		if(treefile.exists()){
+			try{
+				java.nio.file.Files.copy(treefile.toPath(),treefileCopy.toPath(),java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+			}catch(java.io.IOException e){
+				e.printStackTrace();
+			}
+		}
+    }
 	
 	public static void runRAxML(File in,File RAxMLPath,int seqLength,String suffix,String root,boolean noGenes,File parameters,int seed){
 			File outFolder=new File(in.getParent());

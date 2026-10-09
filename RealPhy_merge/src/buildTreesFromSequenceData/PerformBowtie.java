@@ -2,6 +2,10 @@ package buildTreesFromSequenceData;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import util.phylogenetics.RunTreePrograms;
 
@@ -9,23 +13,96 @@ import util.phylogenetics.RunTreePrograms;
 
 
 public class PerformBowtie {
-	public static ArrayList<File> runMultiple(File core,ArrayList<File> cutSequences,File outFolder,String bowtiepath,String buildpath,boolean runBowtie,int seedLength,File bowtieOptions) throws RealphyException{
-		ArrayList<File> alignFiles=new ArrayList<File>();
-		for(int i=0;i<cutSequences.size();i++){
-			String name=cutSequences.get(i).getName();
-			if(name.endsWith("R2.fastq.gz"))continue;
-			
-			String suffix=samtoolsExist()?".bam":".sam";
-			File out=new File(outFolder+"/"+RealPhy.getId(name)+suffix);
-			if(!name.endsWith("R1.fastq.gz")){
-				runBowtie(core,cutSequences.get(i),out,bowtiepath,buildpath,runBowtie, seedLength,bowtieOptions);
-			}else{
-				String pair1=cutSequences.get(i).toString();
-				String newName=name.substring(0,name.length()-11)+"R2.fastq.gz";
-				String pair2=cutSequences.get(i).getParent()+"/"+newName;
-				runBowtie(core, pair1, pair2, out, bowtiepath, buildpath, runBowtie, seedLength, bowtieOptions);
+	public static ArrayList<File> runMultiple(File core,ArrayList<File> cutSequences,File outFolder,String bowtiepath,String buildpath,boolean runBowtie,int seedLength,File bowtieOptions,int threadNum) throws RealphyException{
+		File database=new File(core+".1.bt2");
+
+        // create bowtie database if it does not already exist
+		try{
+			if(!database.exists()){
+				String buildDB=buildpath+" -f "+core+ " "+core;
+				Process p=Runtime.getRuntime().exec(buildDB);
+				if(p.waitFor()!=0){
+					System.err.println(buildDB);
+					InputStream i=p.getErrorStream();
+					int c=0;
+					while((c=i.read())!=-1){
+						System.err.print((char)c);
+					}
+					System.err.println("Building the bowtie database was not successful!");
+					System.exit(-1);
+				}
 			}
-			alignFiles.add(out);
+		}catch(InterruptedException e){
+			e.printStackTrace();
+			System.exit(-1);
+		}catch(IOException e){
+			e.printStackTrace();
+			System.exit(-1);
+		}
+
+		final File coreFinal=core;
+		final ArrayList<File> cutSequencesFinal=cutSequences;
+		final File outFolderFinal=outFolder;
+		final String bowtiepathFinal=bowtiepath;
+		final String buildpathFinal=buildpath;
+		final boolean runBowtieFinal=runBowtie;
+		final int seedLengthFinal=seedLength;
+		final File bowtieOptionsFinal=bowtieOptions;
+		final String suffix=samtoolsExist()?".bam":".sam";
+
+		File[] results=new File[cutSequencesFinal.size()];
+		int workers=Math.max(1, threadNum);
+		ExecutorService executor=Executors.newFixedThreadPool(workers);
+		ArrayList<Future<?>> futures=new ArrayList<Future<?>>();
+
+		for(int i=0;i<cutSequencesFinal.size();i++){
+			String name=cutSequencesFinal.get(i).getName();
+			if(name.endsWith("R2.fastq.gz"))continue;
+
+			final int idx=i;
+			final String currentName=name;
+			futures.add(executor.submit(new Runnable(){
+				public void run(){
+					try{
+						File out=new File(outFolderFinal+"/"+RealPhy.getId(currentName)+suffix);
+						if(!currentName.endsWith("R1.fastq.gz")){
+							runBowtie(coreFinal,cutSequencesFinal.get(idx),out,bowtiepathFinal,buildpathFinal,runBowtieFinal,seedLengthFinal,bowtieOptionsFinal);
+						}else{
+							String pair1=cutSequencesFinal.get(idx).toString();
+							String newName=currentName.substring(0,currentName.length()-11)+"R2.fastq.gz";
+							String pair2=cutSequencesFinal.get(idx).getParent()+"/"+newName;
+							runBowtie(coreFinal,pair1,pair2,out,bowtiepathFinal,buildpathFinal,runBowtieFinal,seedLengthFinal,bowtieOptionsFinal);
+						}
+						results[idx]=out;
+					}catch(RealphyException e){
+						throw new RuntimeException(e);
+					}
+				}
+			}));
+		}
+
+		executor.shutdown();
+		for(int i=0;i<futures.size();i++){
+			try{
+				futures.get(i).get();
+			}catch(InterruptedException e){
+				Thread.currentThread().interrupt();
+				throw new RealphyException("Bowtie alignment execution was interrupted.");
+			}catch(ExecutionException e){
+				Throwable cause=e.getCause();
+				if(cause instanceof RuntimeException && cause.getCause() instanceof RealphyException){
+					throw (RealphyException)cause.getCause();
+				}
+				String msg=cause==null?"Bowtie alignment job failed.":cause.getMessage();
+				throw new RealphyException(msg);
+			}
+		}
+
+		ArrayList<File> alignFiles=new ArrayList<File>();
+		for(int i=0;i<results.length;i++){
+			if(results[i]!=null){
+				alignFiles.add(results[i]);
+			}
 		}
 		return alignFiles;
 	}

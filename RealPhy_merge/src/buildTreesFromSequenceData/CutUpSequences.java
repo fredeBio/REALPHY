@@ -2,6 +2,10 @@ package buildTreesFromSequenceData;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.zip.GZIPOutputStream;
 
 import util.*;
@@ -12,27 +16,43 @@ public class CutUpSequences {
 	}
 	
 	public static ArrayList<File> runCutUpSequences(String args[]){
-		ArrayList<File> cutSeqs=new ArrayList<File>();
 		File inputFolder=new File(args[0]);
-		int length=Integer.parseInt(args[1]);
-		File outputFolder=new File(args[2]);
-		boolean clean=new Boolean(args[3]);
-		File[] files=inputFolder.listFiles();
-		HashMap<String,Boolean> hm=new HashMap<String,Boolean>();
+		final int length=Integer.parseInt(args[1]);
+		final File outputFolder=new File(args[2]);
+		final boolean clean=Boolean.parseBoolean(args[3]);
+		int threadNum=1;
+		if(args.length>4){
+			threadNum=Integer.parseInt(args[4]);
+			if(threadNum<1){
+				threadNum=1;
+			}
+		}
+		final File[] files=inputFolder.listFiles();
+		ArrayList<File> cutSeqs=new ArrayList<File>(Arrays.asList(new File[files.length]));
+		final HashMap<String,Boolean> hm=new HashMap<String,Boolean>();
+		ExecutorService executor=Executors.newFixedThreadPool(threadNum);
+		ArrayList<Future<?>> futures=new ArrayList<Future<?>>();
+        
 		for(int i=0;i<files.length;i++){
 			String name=files[i].getName();
 			
 			if(RealPhy.hasExtension(name, RealPhy.fasExt)||RealPhy.hasExtension(name, RealPhy.gbkExt)){
-				File temp=cutFasta(files[i],length,outputFolder,clean);
-				
-				if(temp!=null&&!hm.containsKey(temp.getName())){
-					hm.put(temp.getName(),true);
-					cutSeqs.add(temp);
-				}
+				final int idx=i;
+				futures.add(executor.submit(new Runnable(){
+					public void run(){
+						File temp=cutFasta(files[idx],length,outputFolder,clean);
+						synchronized(hm){
+							if(temp!=null&&!hm.containsKey(temp.getName())){
+								hm.put(temp.getName(),true);
+								cutSeqs.set(idx,temp);
+							}
+						}
+					}
+				}));
 			}else if(RealPhy.hasExtension(name, RealPhy.fastqExt)){
 				//DO NOT CUT FASTQ FILES ANYMORE!!!
 				
-				cutSeqs.add(files[i]);
+				cutSeqs.set(i,files[i]);
 
 //				File temp=cutFastq(files[i],length,outputFolder,clean);
 //				if(temp!=null&&!hm.containsKey(temp.getName())){
@@ -40,9 +60,22 @@ public class CutUpSequences {
 //					cutSeqs.add(temp);
 //				}
 			}else if(RealPhy.hasExtension(name, RealPhy.gzExt)){
-				cutSeqs.add(files[i]);
+				cutSeqs.set(i,files[i]);
 
 			}
+		}
+		executor.shutdown();
+		for(int i=0;i<futures.size();i++){
+			try{
+				futures.get(i).get();
+			}catch(InterruptedException e){
+				Thread.currentThread().interrupt();
+				throw new RuntimeException(e);
+			}catch(ExecutionException e){
+				throw new RuntimeException(e);
+			}
+		}
+		while(cutSeqs.remove(null)){
 		}
 		return cutSeqs;
 	}

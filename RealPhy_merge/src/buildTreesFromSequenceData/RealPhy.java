@@ -76,7 +76,9 @@ public class RealPhy {
 			else {
 				bt.runAnalyses();
 			}
-			bt.analyseDeletedSites();
+			if(!(Boolean)bt.arguments.get("alignment-only")){
+				bt.analyseDeletedSites();
+			}
 		}else{
 			if(args.length>0&&args[0].equals("-version")){
 				printVersion();
@@ -128,12 +130,15 @@ public class RealPhy {
 				"   2=raxml\n" +
 				"   3=max. parsimony (dnapars)\n" +
 				"   4=PhyML (default)\n" +
+                "   5=IQTree\n" +
 				"-quiet/-q If set then it suppresses any program output except for errors or warnings.\n" +
 				"-varOnly/-v If set then homologous positions that are conserved in all input sequences are put out. If set then the reconstructed tree may be wrong.\n" +
 				//"-aligner [integer] default=1;\n" +
 				//"	0=SOAP2\n" +
 				//"	1=bowtie2\n" +
 				"-seedLength [integer] default=22 Possible values: Integer between 4 and 32; specifies k-mer length in bowtie2.\n" +
+				"-thread-num [integer] default=1; Possible values: Integer greater than or equal to 1; number of threads used by the aligner.\n" +
+				"-alignment-only If set then only sequence alignment is performed, no polymorphism extraction or tree reconstruction.\n" +
 				"-suffix [string] default=not set; appends a suffix to the reference output folder.\n" +
 				"-d/-delete If this option is set then all alignment output files and sequence cut files will be deleted after the program is terminated.\n" +
 				"-merge/-m If this option is set multiple references are selected, a final polymorphism file will be generated which combines all polymorphism files for all references. \n" +
@@ -173,6 +178,8 @@ public class RealPhy {
         novalueArgs.put("c", true);
 
         novalueArgs.put("genes", true);
+
+		novalueArgs.put("alignment-only", true);
 
         novalueArgs.put("version", true);
 
@@ -295,6 +302,9 @@ public class RealPhy {
 				FileHandler.deleteFolder(cutFolder);
 			}
 			ArrayList<File> alignmentFiles=getAlignments(true);
+			if((Boolean)arguments.get("alignment-only")){
+				continue;
+			}
 			System.out.println("Determine SNPs...");
 			File polymorphismsFas=getPolymorphisms(alignmentFiles, core,refs.get(i));
 			buildTree(polymorphismsFas);		
@@ -469,6 +479,9 @@ public class RealPhy {
 				runAlignmentProgram(core,cuts);
 				//FileHandler.deleteFolder(cutFolder);
 			}
+			if((Boolean)arguments.get("alignment-only")){
+				continue;
+			}
 			File columnsFile=new File(outFolder+"/"+refs.get(i)+"_columns.obj");
 			if(!columnsFile.exists()){
 				ArrayList<File> alignmentFiles=getAlignments(true);
@@ -493,6 +506,9 @@ public class RealPhy {
 			Clashes merge=new Clashes(columnCollection);
 			
 			merge.printAlignment(alignment);
+		}
+		if((Boolean)arguments.get("alignment-only")){
+			return;
 		}
 		System.out.println("Building merge tree...");
 		buildTree(alignment);
@@ -619,7 +635,7 @@ public class RealPhy {
 	}
 	public ArrayList<File> cutSequences(){
 		//cut up sequences
-		String[] cuArgs={sequenceFolder.toString(),arguments.get("readLength").toString(),cutFolder.toString(),new Boolean(clean).toString()};
+		String[] cuArgs={sequenceFolder.toString(),arguments.get("readLength").toString(),cutFolder.toString(),Boolean.toString(clean),arguments.get("thread-num").toString()};
 		ArrayList<File> cutSequences=CutUpSequences.runCutUpSequences(cuArgs);
 		
 		return cutSequences;
@@ -632,7 +648,7 @@ public class RealPhy {
 			alignmentFolder.mkdir();
 		}
 		try{
-			ArrayList<File> alignmentFiles=aligner==soap2?PerformSoap.runMultipleSoaps(core,cutSequences,alignmentFolder,path.get("SOAP"),path.get("SOAPBUILDER"),runAlignment):PerformBowtie.runMultiple(core,cutSequences,alignmentFolder,path.get("BOWTIE2"),path.get("BOWTIE2BUILDER"),runAlignment,seedLength,bowtieOptions);
+			ArrayList<File> alignmentFiles=aligner==soap2?PerformSoap.runMultipleSoaps(core,cutSequences,alignmentFolder,path.get("SOAP"),path.get("SOAPBUILDER"),runAlignment):PerformBowtie.runMultiple(core,cutSequences,alignmentFolder,path.get("BOWTIE2"),path.get("BOWTIE2BUILDER"),runAlignment,seedLength,bowtieOptions,(Integer)arguments.get("thread-num"));
 			return alignmentFiles;
 		}catch(RealphyException e){
 			e.printStackTrace();
@@ -716,7 +732,12 @@ public class RealPhy {
 				int rand=(int)(Math.random()*1000000);
 				RunTreePrograms.runPhyML(phylip.getAbsoluteFile(), new File(path.get("PhyML")),treeOptions,rand);
 				tree=new File(phylip+"_phyml_tree.txt");
-			}
+			} else if(treeBuilder==5){
+                Fasta.writePhylip(fas, phylip, 100);
+                int rand=(int)(Math.random()*1000000);
+				RunTreePrograms.runIQTree(phylip.getAbsoluteFile(), new File(path.get("IQTree")),treeOptions,rand,(Integer)arguments.get("thread-num"));
+                tree=new File(phylip+".treefile");
+            }
 			if(tree!=null)printTree(tree);
 		}else if(treeBuilder>0){
 			String errormsg="TOO FEW SPECIES! For tree reconstruction at least four different isolates are required.";
@@ -786,6 +807,7 @@ public class RealPhy {
 		path.put("BOWTIE2BUILDER","bowtie2-build");
 		path.put("MaxPars","dnapars");
 		path.put("PhyML","phyml");
+        path.put("IQTree","iqtree");
 		arguments.put("readLength", new Integer(50));
 		arguments.put("coreGenomes", new Integer(1));
 		arguments.put("perBaseScore", new Double(1));
@@ -805,6 +827,8 @@ public class RealPhy {
 		//arguments.put("covWindow", 0);
 		arguments.put("aligner", bowtie2);
 		arguments.put("seedLength", 22);
+		arguments.put("thread-num", 1);
+		arguments.put("alignment-only", false);
 		arguments.put("suffix","");
 		arguments.put("gaps", false);
 
@@ -954,13 +978,15 @@ public class RealPhy {
 				return null;
 			}
 		}else if(arg.equals("treeBuilder")){
-			return checkInteger(arg,value,0,4);
+			return checkInteger(arg,value,0,5);
 		}else if(arg.equals("aligner")){
 			return checkInteger(arg,value,soap2,bowtie2);
 		}else if(arg.equals("covWindow")){
 			return checkInteger(arg,value,0,Integer.MAX_VALUE);
 		}else if(arg.equals("seedLength")){ 
 			return checkInteger(arg,value,4,32);
+		}else if(arg.equals("thread-num")){
+			return checkInteger(arg,value,1,Integer.MAX_VALUE);
 		}else if(arg.equals("ref")){
 			references=true;
 			return checkRef(value);
@@ -1001,6 +1027,11 @@ public class RealPhy {
 
 		}else if(arg.equals("varOnly")||arg.equals("v")){
 			arguments.put("varOnly", true);
+
+			return true;
+
+		}else if(arg.equals("alignment-only")){
+			arguments.put("alignment-only", true);
 
 			return true;
 
