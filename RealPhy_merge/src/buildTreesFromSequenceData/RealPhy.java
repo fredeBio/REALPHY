@@ -731,7 +731,10 @@ public class RealPhy {
 				Fasta.writePhylip(fas, phylip, 100);
 				int rand=(int)(Math.random()*1000000);
 				RunTreePrograms.runPhyML(phylip.getAbsoluteFile(), new File(path.get("PhyML")),treeOptions,rand);
-				tree=new File(phylip+"_phyml_tree.txt");
+				//newer PhyML versions write [prefix]_phyml_tree, older ones [prefix]_phyml_tree.txt
+				File phymlTreeNew=new File(phylip+"_phyml_tree");
+				File phymlTreeOld=new File(phylip+"_phyml_tree.txt");
+				tree=(!phymlTreeOld.exists()&&phymlTreeNew.exists())?phymlTreeNew:phymlTreeOld;
 			} else if(treeBuilder==5){
                 Fasta.writePhylip(fas, phylip, 100);
                 int rand=(int)(Math.random()*1000000);
