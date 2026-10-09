@@ -46,11 +46,28 @@ public class RunTreePrograms {
 			System.exit(-1);
 		}		
 
-		String IQTreecom=IQTreePath+" -m GTR -T "+threadNum+" -s "+in;
+		HashMap<String,Boolean> paraHM=getParameters(parameters);
+		String paraLine=getParametersLine(parameters);
+		//drop the prefix option (with its value): output file names must stay at the default
+		StringBuilder paraClean=new StringBuilder();
+		String split[]=paraLine.trim().split("\\s+");
+		for(int i=0;i<split.length;i++){
+			if(split[i].equals("-pre")||split[i].equals("--prefix")){
+				i++;
+				continue;
+			}
+			paraClean.append(" ").append(split[i]);
+		}
+		paraLine=paraClean.toString();
+		String model=(paraHM.containsKey("-m")||paraHM.containsKey("-mset"))?"":" -m GTR ";
+		String threads=(paraHM.containsKey("-T")||paraHM.containsKey("-nt"))?"":" -T "+threadNum+" ";
+		String seedString=(paraHM.containsKey("-seed")||paraHM.containsKey("--seed"))?"":" -seed "+seed+" ";
+
+		String IQTreecom=IQTreePath+" -s "+in+model+threads+seedString+" "+paraLine;
 		//  iqtree -s polymorphisms_move.phy -m GTR -T 3
 		runProgram(IQTreecom,"",outFolder);
-		File treefile=new File(outFolder+"/polymorphisms_move.phy.treefile");
-		File treefileCopy=new File(outFolder+"/polymorphisms_move.phy_phyml_tree.txt");
+		File treefile=new File(outFolder+"/"+in.getName()+".treefile");
+		File treefileCopy=new File(outFolder+"/"+in.getName()+"_phyml_tree.txt");
 		if(treefile.exists()){
 			try{
 				java.nio.file.Files.copy(treefile.toPath(),treefileCopy.toPath(),java.nio.file.StandardCopyOption.REPLACE_EXISTING);
