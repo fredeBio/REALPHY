@@ -1,6 +1,15 @@
 This is a link to the official <a href="http://realphy.unibas.ch/realphy"> REALPHY website</a>.
 
 The manual for REALPHY is available <a href=http://realphy.unibas.ch/docs/Realphy_manual.pdf> here</a>.
+
+# Building
+
+Requires a JDK 9 or later (no internet access needed; all dependencies are in `RealPhy_merge/lib`).
+
+    ./RealPhy_merge/build.sh
+
+This produces a standalone `RealPhy_merge/RealPhy.jar`.
+
 # The terms of use
 
 The developers of the REALPHY give permission to you and your institution to use the REALPHY software for internal, research purposes, on the following conditions:
