@@ -14,3 +14,4 @@
 - PhyML output file `*_phyml_tree` (new PhyML versions) is recognised in addition to `*_phyml_tree.txt`.
 - Java 8 or newer is required (previously the manual stated Java 1.6).
 - Version number is 1.14 (was 1.13).
+- Manual and `-help` text corrected to match the program (defaults of `-ref`, `-root` and `-config`, `-refN`, `-clean`, `-merge`, `-gaps`, `-gapThreshold`, `-varOnly`, `-d`; option names `-polyThreshold` and `-treeBuilder`) and `-ref-list` documented.

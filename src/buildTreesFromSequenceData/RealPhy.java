@@ -109,42 +109,43 @@ public class RealPhy {
 	}
 	public static void printHelp(){
 		System.out.print("Usage:\n" +
-				"java -Xmx[available RAM in MB]m -jar RealPhy_"+version+".jar [Sequence folder] [Output folder] [Options]\n" +
-				"Sequence folder needs to contain fasta files ending with .fas, .fna, .fasta or .fa, genbank files ending in .gbk or .gb and short read files in fastq format ending in .fastq or fastq.gz.\n" +
+				"java -Xmx[available RAM in MB]m -jar RealPhy.jar [Sequence folder] [Output folder] [Options]\n" +
+				"The sequence folder needs to contain FASTA files ending with .fas, .fna, .fasta or .fa, Genbank files ending in .gbk or .gb and short read files in FASTQ format ending in .fastq or .fastq.gz.\n" +
 				"The output folder needs to contain a file called \"config.txt\", which contains information about the location of the required executables such as bowtie2.\n\n"+
 				"Options:\n" +
-				"-readLength [integer] default=50 Possible values: Integer greater than 30; Size of fragments that are to be produced from the FASTA/GBK input sequences. With longer read lengths the mapping will take longer but will also map more divergent sequences.\n" +
-				"-quality [integer] default=20; Possible values: Integer value between 0 and 41 that corresponds to quality values in fastq files (PHRED+33). Bases with values below thresold in fastq file will not be considered (fasta files will be converted into fastq files with a quality of 20).\n" +
-				"-polyThreshold [double] default=0.95; Possible values: Double value between 0 and 1.  Polymorphisms that occur at lower frequency than the specified threshold at any given position of the alignment will not be considered.\n"+
-				"-perBaseCov [integer] default=10; Possible values: Integer greater than or equal to 10.  Polymorphisms will only be extracted for regions that are covered by more than the set threshold of reads.\n" +
-				"-ref [sequence file name (without extension or path!)] default=random; Possible values: The file name of a sequence data set without the extension (.fas, .fasta, .fa, .fna, .fastq, .fastq.gz, .gb or .gbk). Sets the reference sequence.\n" +
-				"-root [sequence file name (without extension or path!)] default=random; Possible values: The file name of a sequence data set without the extension (.fas, .fasta, .fa, .fna, .fastq, .fastq.gz, .gb or .gbk).  Specifies the root of the tree.\n" +
+				"-readLength [integer] default=50 Possible values: Integer greater than or equal to 30; Size of fragments that are to be produced from the FASTA/GBK input sequences. With longer read lengths the mapping will take longer but will also map more divergent sequences.\n" +
+				"-quality [integer] default=20; Possible values: Integer value between 0 and 41 that corresponds to quality values in fastq files (PHRED+33). Bases with values below the threshold in a fastq file will not be considered (FASTA/Genbank sequences are converted into fastq files with the highest quality, 41).\n" +
+				"-polyThreshold [double] default=0.95; Possible values: Double value between 0 and 1. Polymorphisms that occur at lower frequency than the specified threshold at any given position of the alignment will not be considered.\n"+
+				"-perBaseCov [integer] default=10; Possible values: Integer greater than or equal to 1. Polymorphisms will only be extracted for regions that are covered by more than the set threshold of reads.\n" +
+				"-ref [sequence file name (without extension or path!)] default=not set (the first suitable file found in the sequence folder is used: a Genbank file or, if -genes is not set, a FASTA file; the order depends on the file system); Possible values: The file name of a sequence data set without the extension (.fas, .fasta, .fa, .fna, .fastq, .fastq.gz, .gb or .gbk). Sets the reference sequence.\n" +
+				"-root [sequence file name (without extension or path!)] default=not set (no outgroup); Possible values: The file name of a sequence data set without the extension (.fas, .fasta, .fa, .fna, .fastq, .fastq.gz, .gb or .gbk). Specifies the root (outgroup) of the tree. The sequence is moved to the top of the alignment and, for RAxML, passed as outgroup (-o). Several names separated by commas are passed to RAxML as outgroup, but only the first one is moved to the top.\n" +
 				//"-test [boolean] default=false; Possible values: true/false; column comparison tool for multiple different references.\n" +
-				"-refN [sequence file name (without extension or path!)] where N is the n-th reference genome; default=not set; Possible values: The file name of a sequence data set without the extension (.fas, .fasta, .fa, .fna, .fastq, .fastq.gz, .gb or .gbk).\n" +
+				"-refN [sequence file name (without extension or path!)] default=not set; Possible values: The file name of a sequence data set without the extension (.fas, .fasta, .fa, .fna, .fastq, .fastq.gz, .gb or .gbk). Sets an additional reference. N is a number between 0 and 499 that distinguishes the references; give the option once per reference with a single file name each, e.g. -ref1 genomeA -ref2 genomeB. The analysis is run once for each reference.\n" +
+				"-ref-list [text file] default=not set; A text file with one reference file name per line (extension is removed). Equivalent to giving each name with its own -refN.\n" +
 				"-genes If set then genes (CDS) are extracted from a given genbank file.\n" +
-				"-gapThreshold [double] default=0; specifies the proportion of input sequences that are allowed to contain gaps in the final sequence alignment (i.e. if set to 0.2 at most 20% of all nucleotides in each final alignment column are allowed to be gaps).\n" +
-				"-clean/-c If set then the whole analysis will be rerun and existing data will be overwritten!\n" +
+				"-gapThreshold [double] default=0; specifies the proportion of input sequences that are allowed to contain gaps in the final sequence alignment (i.e. if set to 0.2, a site is kept only if fewer than 20% of the input sequences have a gap at this site; with the default 0 every site that is a gap in at least one input sequence is removed).\n" +
+				"-clean/-c If set then the whole analysis will be rerun and existing data will be overwritten! The cut folder in the sequence folder and the output folder of each reference are deleted before the reference is processed. Without this option existing alignment files are reused.\n" +
 				"-treeBuilder [integer] default=4;\n" +
-				"   0=Do not build a tree;\n" +
-				"   1=treepuzzle; \n" +
-				"   2=raxml\n" +
-				"   3=max. parsimony (dnapars)\n" +
+				"   0=do not build a tree\n" +
+				"   1=TREE-PUZZLE\n" +
+				"   2=RAxML\n" +
+				"   3=maximum parsimony (dnapars)\n" +
 				"   4=PhyML (default)\n" +
-                "   5=IQTree\n" +
+                "   5=IQ-TREE\n" +
 				"-quiet/-q If set then it suppresses any program output except for errors or warnings.\n" +
-				"-varOnly/-v If set then homologous positions that are conserved in all input sequences are put out. If set then the reconstructed tree may be wrong.\n" +
+				"-varOnly/-v If set then only variable positions are written to the output; positions that are conserved in all input sequences are omitted. The reconstructed tree may be wrong in this case.\n" +
 				//"-aligner [integer] default=1;\n" +
 				//"	0=SOAP2\n" +
 				//"	1=bowtie2\n" +
 				"-seedLength [integer] default=22 Possible values: Integer between 4 and 32; specifies k-mer length in bowtie2.\n" +
 				"-thread-num [integer] default=1; Possible values: Integer greater than or equal to 1; number of threads used by the aligner.\n" +
 				"-alignment-only If set then only sequence alignment is performed, no polymorphism extraction or tree reconstruction.\n" +
-				"-suffix [string] default=not set; appends a suffix to the reference output folder.\n" +
-				"-d/-delete If this option is set then all alignment output files and sequence cut files will be deleted after the program is terminated.\n" +
-				"-merge/-m If this option is set multiple references are selected, a final polymorphism file will be generated which combines all polymorphism files for all references. \n" +
-				"-gaps/-g If this option is set. The gapThreshold is automatically set to 100%, unless a different gapThreshold is specified.\n" +
-				"-config [string] this specifies the location of the config.txt. If not set it is assumed that the config.txt is in the working directory.\n" +
-				"-treeOptions [text file] This option allows the user to provide command line parameters to the tree program in the first line of a given text file.\n" +
+				"-suffix [string] default=not set; Appends a suffix to the reference output folder.\n" +
+				"-d/-delete Currently has no effect (alignment files are always kept, the cut folder is always deleted after the alignment).\n" +
+				"-merge/-m If this option is set and multiple references are selected, a final polymorphism file will be generated which combines all polymorphism files for all references. The merged alignment is written to <output folder>/merge/mergedAlignment.fas and the tree is built from it. Needs a lot of time and RAM.\n" +
+				"-gaps/-g If this option is set then sites that are a gap in some of the input sequences are kept (written as -). The gapThreshold is automatically set to 100%, unless a different gapThreshold is specified.\n" +
+				"-config [string] Specifies the location of the config.txt. If not set the config.txt in the output folder is used.\n" +
+				"-treeOptions [text file] This option allows the user to provide command line parameters to the tree program (RAxML, PhyML or IQ-TREE) in the first line of a given text file.\n" +
 				"-bowtieOptions [text file] This option allows the user to provide command line parameters to bowtie2 in the first line of a given text file.\n" +
 				"-h/-help Shows this help.\n" +
 				"-version Prints the program's version.\n" );
