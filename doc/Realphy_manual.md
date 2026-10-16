@@ -84,17 +84,10 @@ java -jar RealPhy.jar -version
 
 # Quickstart
 
-The program can be run as follows (you may have to adjust the version number; a jar built with `build.sh` is simply called `RealPhy.jar`):
+The program can be run as follows (the jar built with `build.sh` is called `RealPhy.jar`; adjust the path if it is not in the current folder):
 
 ```
-java -jar -Xmx2000m RealPhy_v114.jar \
-  <sequence folder> <output folder> [options]
-```
-
-Or you can use the shell script in the RealPhy folder to start REALPHY:
-
-```
-REALPHY_v114 \
+java -jar -Xmx2000m RealPhy.jar \
   <sequence folder> <output folder> [options]
 ```
 
@@ -312,7 +305,7 @@ Further options include:
 Usage:
 
 ```
-java -Xmx[available RAM in MB]m -jar RealPhy_v1.14.jar \
+java -Xmx[available RAM in MB]m -jar RealPhy.jar \
   [Sequence folder] [Output folder] [Options]
 ```
 
