@@ -1,5 +1,6 @@
-RealPhy_merge/bin/
-RealPhy_merge/RealPhy.jar
-RealPhy_merge/sources.txt
+/bin/
+/RealPhy.jar
+/sources.txt
+/test_run/
 .DS_Store
 .idea/
