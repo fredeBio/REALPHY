@@ -4,11 +4,11 @@ The manual for REALPHY is available <a href=http://realphy.unibas.ch/docs/Realph
 
 # Building
 
-Requires a JDK 9 or later (no internet access needed; all dependencies are in `RealPhy_merge/lib`).
+Requires a JDK 9 or later (no internet access needed; all dependencies are in `lib`).
 
-    ./RealPhy_merge/build.sh
+    ./build.sh
 
-This produces a standalone `RealPhy_merge/RealPhy.jar`.
+This produces a standalone `RealPhy.jar`.
 
 # The terms of use
 

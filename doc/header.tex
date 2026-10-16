@@ -1,0 +1,39 @@
+% LaTeX tweaks that make the pandoc output resemble the original Word manual.
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage{etoolbox}
+\usepackage{xurl}
+\usepackage{xcolor}
+\usepackage{float}
+\setstretch{1.5}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.6em}
+\definecolor{doctitle}{RGB}{31,56,100}
+\renewcommand{\labelitemi}{\textendash}
+\renewcommand{\labelitemii}{\textendash}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[R]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[R]{\thepage}\renewcommand{\headrulewidth}{0pt}}
+\titleformat{\section}{\bfseries\large}{}{0pt}{}
+\titleformat{\subsection}{\bfseries\normalsize}{}{0pt}{}
+\titlespacing*{\section}{0pt}{1.5ex}{0.5ex}
+\titlespacing*{\subsection}{0pt}{1ex}{0.3ex}
+% Centered title in sans-like "Cambria" style with a rule below
+\makeatletter
+\renewcommand{\maketitle}{%
+  \begin{center}
+    {\LARGE\color{doctitle}\IfFontExistsTF{Palatino}{\fontspec{Palatino}}{}\@title\par}
+    \vspace{0.6em}\rule{\linewidth}{0.4pt}
+  \end{center}}
+\makeatother
+\AtBeginEnvironment{quote}{\small\setstretch{1.2}}
+\AtBeginEnvironment{Shaded}{\small}
+\setlength{\emergencystretch}{3em}
+\floatplacement{figure}{H}
+
+% wrap long lines in code blocks instead of letting them run off the page
+\usepackage{fvextra}
+\RecustomVerbatimEnvironment{verbatim}{Verbatim}{breaklines=true,breakanywhere=true}
