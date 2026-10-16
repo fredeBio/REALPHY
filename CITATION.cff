@@ -1,0 +1,41 @@
+cff-version: 1.2.0
+message: "If you use REALPHY, please cite the paper below."
+title: "REALPHY"
+abstract: "Reference sequence Alignment based Phylogeny builder: automated reconstruction of whole genome phylogenies from short sequence reads."
+type: software
+version: "1.14"
+license: GPL-3.0-or-later
+repository-code: "https://github.com/fredeBio/REALPHY"
+url: "http://realphy.unibas.ch/realphy"
+authors:
+  - family-names: Bertels
+    given-names: Frederic
+  - family-names: Silander
+    given-names: Olin K.
+  - family-names: Pachkov
+    given-names: Mikhail
+  - family-names: Rainey
+    given-names: Paul B.
+  - family-names: van Nimwegen
+    given-names: Erik
+preferred-citation:
+  type: article
+  title: "Automated reconstruction of whole genome phylogenies from short sequence reads"
+  authors:
+    - family-names: Bertels
+      given-names: Frederic
+    - family-names: Silander
+      given-names: Olin K.
+    - family-names: Pachkov
+      given-names: Mikhail
+    - family-names: Rainey
+      given-names: Paul B.
+    - family-names: van Nimwegen
+      given-names: Erik
+  journal: "Molecular Biology and Evolution"
+  volume: 31
+  issue: 5
+  start: 1077
+  end: 1088
+  year: 2014
+  doi: "10.1093/molbev/msu088"
